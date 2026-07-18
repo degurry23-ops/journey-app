@@ -96,7 +96,7 @@ async function send(){
       for(var p=0;p<day.places.length;p++){var pl=day.places[p];html+='<div style="display:flex;align-items:center;gap:12px;padding:8px 0;font-size:14px;"><span style="font-family:var(--font-mono);font-size:12px;color:var(--muted-fg);min-width:48px;">'+(pl.time||'09:00')+'</span><span>'+(pl.cat==='美食'?'🍜':pl.cat==='咖啡'?'☕':pl.cat==='购物'?'🛍':pl.cat==='住宿'?'🏨':'📍')+'</span><span>'+pl.name+'</span></div>';}
       html+='</div>';
     }
-    html+='<script>window._tripData='+JSON.stringify(tripData)+';function confirmTrip(){var t=addTrip(window._tripData);location.href="trip-detail.html?id="+t.id;}</script>';
+    html+='<scr'+'ipt>window._tripData='+JSON.stringify(tripData)+';function confirmTrip(){var t=addTrip(window._tripData);location.href="trip-detail.html?id="+t.id;}</scr'+'ipt>';
     html+='<button class="btn btn-primary btn-lg btn-full" style="margin-top:24px;" onclick="confirmTrip()">✈️ 确认行程，开始旅程</button>';
     html+='<button class="btn btn-outline btn-lg btn-full" style="margin-top:12px;" onclick="location.reload()">🔄 重新生成</button></div>';
     document.querySelector('main').innerHTML=html;document.querySelector('footer').style.display='none';
