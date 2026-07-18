@@ -12,12 +12,12 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20">
-      <main className="max-w-lg mx-auto px-4 pt-4">
+      <main className="w-full max-w-5xl mx-auto px-4 md:px-8 pt-4 md:pt-8">
         <Outlet />
       </main>
       {!isInner && (
         <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-[#E2E8F0] z-50 safe-bottom">
-          <div className="max-w-lg mx-auto flex justify-around py-2">
+          <div className="max-w-5xl mx-auto flex justify-around py-2">
             {tabs.map(t => (
               <NavLink
                 key={t.to}
@@ -31,9 +31,6 @@ export default function Layout() {
               >
                 <span className="text-xl">{t.icon}</span>
                 <span className="text-[10px] font-medium mt-0.5">{t.label}</span>
-                {({ isActive }) => isActive && (
-                  <span className="block w-1 h-1 rounded-full bg-[#3B82F6] mt-0.5" />
-                )}
               </NavLink>
             ))}
           </div>

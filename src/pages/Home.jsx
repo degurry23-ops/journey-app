@@ -11,161 +11,152 @@ export default function Home() {
   const next = upcoming[0];
 
   const today = new Date();
-  const greetings = ['早上好 ☀️', '下午好 🌤', '晚上好 🌙'];
   const hour = today.getHours();
-  const greeting = hour < 12 ? greetings[0] : hour < 18 ? greetings[1] : greetings[2];
+  const greeting = hour < 12 ? '早上好 ☀️' : hour < 18 ? '下午好 🌤' : '晚上好 🌙';
 
   return (
-    <div className="space-y-5 animate-fade-in pb-4">
+    <div className="space-y-6 animate-fade-in pb-4">
       {/* Header */}
-      <div className="pt-2">
-        <p className="text-xs text-[#95A5A6] tracking-wider uppercase">
-          {formatFullDate(today.toISOString())}
-        </p>
-        <div className="flex items-center justify-between mt-1">
-          <h1 className="text-[28px] font-bold text-[#2C3E50] tracking-tight">
-            {greeting}
-          </h1>
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2D6A4F] to-[#52B788] flex items-center justify-center text-white text-sm font-bold">
-            J
-          </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs text-[#94A3B8] tracking-wider uppercase">{formatFullDate(today.toISOString())}</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#1E293B] mt-0.5">{greeting}</h1>
         </div>
-        {active.length > 0 && (
-          <p className="text-sm text-[#52B788] font-medium mt-0.5">旅途愉快 ✈️</p>
-        )}
+        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#2563EB] flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">
+          J
+        </div>
       </div>
 
-      {/* Countdown Card */}
-      {next && (
-        <div onClick={() => navigate(`/trip/${next.id}`)}
-          className="relative overflow-hidden bg-gradient-to-br from-[#2D6A4F] via-[#40916C] to-[#52B788] rounded-3xl p-6 text-white cursor-pointer active:scale-[0.98] transition-transform">
-          <div className="absolute top-3 right-4 text-6xl opacity-10">🗺️</div>
-          <p className="text-sm opacity-80 font-medium">距离下一次旅行</p>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-6xl font-bold tracking-tighter">
-              {Math.max(0, daysBetween(today.toISOString().split('T')[0], next.startDate))}
-            </span>
-            <span className="text-lg opacity-80">天</span>
+      {/* Countdown + Quick Stats */}
+      <div className="grid md:grid-cols-3 gap-4">
+        {/* Countdown Card */}
+        {next ? (
+          <div onClick={() => navigate(`/trip/${next.id}`)}
+            className="md:col-span-2 relative overflow-hidden bg-gradient-to-br from-[#1E3A5F] via-[#2563EB] to-[#60A5FA] rounded-3xl p-6 md:p-8 text-white cursor-pointer active:scale-[0.98] transition-transform">
+            <div className="absolute top-4 right-6 text-8xl opacity-10">🗺️</div>
+            <p className="text-sm opacity-80 font-medium">距离下一次旅行</p>
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-6xl md:text-7xl font-bold tracking-tighter">
+                {Math.max(0, daysBetween(today.toISOString().split('T')[0], next.startDate))}
+              </span>
+              <span className="text-xl opacity-80">天</span>
+            </div>
+            <div className="flex items-center gap-3 mt-4">
+              <span className="text-2xl">🎌</span>
+              <div>
+                <p className="font-semibold text-lg">{next.destination}之旅</p>
+                <p className="text-sm opacity-75">{formatDate(next.startDate)} - {formatDate(next.endDate)} · {next.days?.length || 0}天</p>
+              </div>
+            </div>
+            <div className="mt-5 flex items-center gap-3">
+              <div className="flex-1 bg-white/20 rounded-full h-2 overflow-hidden">
+                <div className="bg-white h-full rounded-full transition-all duration-700" style={{width:`${next.readiness || 15}%`}} />
+              </div>
+              <span className="text-sm font-medium">{next.readiness || 15}%</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 mt-3">
-            <span className="text-xl">🎌</span>
+        ) : (
+          <div className="md:col-span-2 bg-gradient-to-br from-[#EFF6FF] to-white rounded-3xl p-8 border-2 border-dashed border-[#DBEAFE] flex flex-col items-center justify-center text-center">
+            <p className="text-6xl mb-4 animate-float">🗺️</p>
+            <h2 className="text-xl font-bold text-[#1E293B] mb-2">开启你的第一段旅程</h2>
+            <p className="text-[#94A3B8] text-sm">AI 帮你规划路线 · 记录每个瞬间 · 珍藏整段旅行</p>
+          </div>
+        )}
+
+        {/* Stats mini card */}
+        <div className="card flex flex-col justify-center items-center text-center gap-3 !p-6">
+          <div className="grid grid-cols-2 gap-4 w-full">
             <div>
-              <p className="font-semibold">{next.destination}之旅</p>
-              <p className="text-sm opacity-75">{formatDate(next.startDate)} - {formatDate(next.endDate)} · {next.days?.length || 0}天</p>
+              <p className="text-3xl font-bold text-[#3B82F6]">{trips.length}</p>
+              <p className="text-xs text-[#94A3B8] mt-1">次旅行</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-[#10B981]">{active.length}</p>
+              <p className="text-xs text-[#94A3B8] mt-1">进行中</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-[#8B5CF6]">{completed.length}</p>
+              <p className="text-xs text-[#94A3B8] mt-1">已完成</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-[#F59E0B]">{upcoming.length}</p>
+              <p className="text-xs text-[#94A3B8] mt-1">即将出发</p>
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-2">
-            <div className="flex-1 bg-white/20 rounded-full h-1.5 overflow-hidden">
-              <div className="bg-white h-full rounded-full transition-all duration-700" style={{width:`${next.readiness || 15}%`}} />
-            </div>
-            <span className="text-xs opacity-70">{next.readiness || 15}%</span>
-          </div>
         </div>
-      )}
+      </div>
 
-      {/* No trips */}
-      {trips.length === 0 && (
-        <div className="text-center py-10 animate-scale-in">
-          <div className="text-7xl animate-float mb-6">🗺️</div>
-          <h2 className="text-xl font-bold text-[#2C3E50] mb-2">开启你的第一段旅程</h2>
-          <p className="text-sm text-[#95A5A6] leading-relaxed mb-2">
-            AI 帮你规划路线 · 记录每个瞬间 · 珍藏整段旅行
-          </p>
-          <div className="flex justify-center gap-3 mt-6 text-3xl">
-            <span className="animate-float" style={{animationDelay:'0s'}}>✈️</span>
-            <span className="animate-float" style={{animationDelay:'0.3s'}}>📸</span>
-            <span className="animate-float" style={{animationDelay:'0.6s'}}>🗺️</span>
-          </div>
-        </div>
-      )}
-
-      {/* Active trips */}
+      {/* Active Trips */}
       {active.length > 0 && (
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-[#2C3E50]">正在进行</h2>
+          <div className="flex items-center gap-2 mb-4">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <h2 className="text-lg font-bold text-[#1E293B]">正在进行</h2>
           </div>
-          {active.map((t, i) => (
-            <div key={t.id} onClick={() => navigate(`/trip/${t.id}`)}
-              className="card card-hover cursor-pointer mb-3 animate-fade-in" style={{animationDelay:`${i*0.1}s`}}>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#E07A5F] to-[#F4A261] flex items-center justify-center text-2xl shadow-sm">
-                  ✈️
+          <div className="grid md:grid-cols-2 gap-3">
+            {active.map(t => (
+              <div key={t.id} onClick={() => navigate(`/trip/${t.id}`)}
+                className="card card-press card-hover cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-2xl shadow-sm">✈️</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[#1E293B]">{t.destination}之旅</p>
+                    <p className="text-xs text-[#94A3B8] mt-0.5">{formatDate(t.startDate)} - {formatDate(t.endDate)} · {t.members?.length || 1}人</p>
+                  </div>
+                  <span className="tag tag-green">进行中</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[#2C3E50]">{t.destination}之旅</p>
-                  <p className="text-xs text-[#95A5A6] mt-0.5">
-                    {formatDate(t.startDate)} - {formatDate(t.endDate)} · {t.members?.length || 1}人同行
-                  </p>
-                </div>
-                <span className="tag tag-green">进行中</span>
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* Upcoming */}
-      {upcoming.length > 0 && (
-        <section>
-          <h2 className="text-lg font-bold text-[#2C3E50] mb-3">即将出发</h2>
-          {upcoming.map((t, i) => (
-            <div key={t.id} onClick={() => navigate(`/trip/${t.id}`)}
-              className="card card-hover cursor-pointer mb-3 animate-fade-in" style={{animationDelay:`${i*0.1}s`}}>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#457B9D] to-[#6BB3D9] flex items-center justify-center text-2xl shadow-sm">
-                  📅
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-[#2C3E50]">{t.destination}之旅</p>
-                  <p className="text-xs text-[#95A5A6] mt-0.5">
-                    {formatDate(t.startDate)} - {formatDate(t.endDate)} · {t.days?.length || 0}天
-                  </p>
-                </div>
-                <span className="tag tag-orange">准备中</span>
-              </div>
-              {t.days?.length > 0 && (
-                <div className="flex gap-1.5 mt-3 overflow-x-auto pb-1">
-                  {t.days.slice(0, 5).map((d, i) => (
-                    <span key={d.id} className="text-[10px] bg-gray-50 text-gray-500 px-2 py-1 rounded-full whitespace-nowrap">
-                      D{i+1}: {d.places?.[0]?.name || '待定'}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </section>
-      )}
-
-      {/* Completed */}
-      {completed.length > 0 && (
-        <section>
-          <h2 className="text-lg font-bold text-[#2C3E50] mb-3">旅行日志</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {completed.slice(0, 5).map(t => (
-              <div key={t.id} onClick={() => navigate(`/trip/${t.id}/journal`)}
-                className="card card-hover cursor-pointer min-w-[140px] flex-shrink-0 text-center">
-                <p className="text-3xl mb-2">📖</p>
-                <p className="font-semibold text-sm text-[#2C3E50]">{t.destination}</p>
-                <p className="text-[10px] text-[#95A5A6] mt-0.5">{t.days?.length || 0}天行程</p>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Create button */}
+      {/* Upcoming */}
+      {upcoming.length > 0 && (
+        <section>
+          <h2 className="text-lg font-bold text-[#1E293B] mb-4">即将出发</h2>
+          <div className="grid md:grid-cols-2 gap-3">
+            {upcoming.map(t => (
+              <div key={t.id} onClick={() => navigate(`/trip/${t.id}`)}
+                className="card card-press card-hover cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center text-2xl shadow-sm">📅</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[#1E293B]">{t.destination}之旅</p>
+                    <p className="text-xs text-[#94A3B8] mt-0.5">{formatDate(t.startDate)} - {formatDate(t.endDate)} · {t.days?.length || 0}天</p>
+                  </div>
+                  <span className="tag tag-amber">准备中</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Completed */}
+      {completed.length > 0 && (
+        <section>
+          <h2 className="text-lg font-bold text-[#1E293B] mb-4">旅行日志</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {completed.map(t => (
+              <div key={t.id} onClick={() => navigate(`/trip/${t.id}/journal`)}
+                className="card card-press card-hover cursor-pointer min-w-[160px] flex-shrink-0 text-center !p-5">
+                <p className="text-3xl mb-2">📖</p>
+                <p className="font-bold text-sm text-[#1E293B]">{t.destination}</p>
+                <p className="text-[10px] text-[#94A3B8] mt-0.5">{t.days?.length || 0}天 · {formatDate(t.startDate)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Create */}
       <button onClick={() => navigate('/create')}
-        className="btn-primary w-full text-center flex items-center justify-center gap-2 !py-4 !text-lg !rounded-2xl">
-        <span className="text-xl">+</span> 创建新旅行
+        className="btn btn-primary btn-full btn-lg !py-5 !text-lg !rounded-2xl !shadow-lg !shadow-blue-200">
+        + 创建新旅行
       </button>
 
-      {/* Footer */}
-      <p className="text-center text-[10px] text-[#c0bdb5] pt-2">
-        Journey · AI Travel Journal
-      </p>
+      <p className="text-center text-[10px] text-[#CBD5E1] pt-2">Journey · AI Travel Journal</p>
     </div>
   );
 }
