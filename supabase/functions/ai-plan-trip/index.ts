@@ -3,7 +3,7 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
-const DEEPSEEK_URL = "https://api.deepseek.com/anthropic/v1/messages";
+const DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
 const DEEPSEEK_KEY = Deno.env.get("DEEPSEEK_API_KEY")!;
 
 const corsHeaders = {
@@ -54,7 +54,7 @@ serve(async (req: Request) => {
         "Authorization": `Bearer ${DEEPSEEK_KEY}`,
       },
       body: JSON.stringify({
-        model: "deepseek-v4-pro",
+        model: "deepseek-chat",
         max_tokens: 4096,
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
@@ -62,7 +62,7 @@ serve(async (req: Request) => {
     });
 
     const data = await response.json();
-    const content = data.content?.[0]?.text || data.choices?.[0]?.message?.content || "";
+    const content = data.choices?.[0]?.message?.content || "";
 
     let result;
     try {
