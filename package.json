@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "predeploy": "vite build",
+    "predeploy": "vite build && cp -r prototype dist/",
     "deploy": "gh-pages -d dist",
     "lint": "oxlint",
     "preview": "vite preview"
