@@ -4,6 +4,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="storage.js"></script>
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <style>:root{--bg:#FAFAFA;--fg:#0F172A;--muted:#F1F5F9;--muted-fg:#64748B;--accent:#0052FF;--accent2:#4D7CFF;--card:#FFF;--border:#E2E8F0;--radius:12px;--radius-lg:16px;--font-display:"Calistoga","Noto Sans SC",Georgia,serif;--font-body:"Inter","Noto Sans SC",system-ui,sans-serif;--font-mono:"JetBrains Mono",monospace}*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--font-body);background:var(--bg);color:var(--fg);line-height:1.6}.container{max-width:900px;margin:0 auto;padding:0 24px}.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.04)}.gradient-text{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--radius);padding:12px 24px;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;min-height:48px}.btn:active{transform:scale(.98)}.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 14px rgba(0,82,255,.2)}.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,82,255,.35)}.btn-full{width:100%}.btn-lg{padding:16px 32px;font-size:17px;border-radius:var(--radius-lg)}.tag{display:inline-flex;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:500}.tag-blue{background:#EFF6FF;color:#1D4ED8}.cover{background:linear-gradient(135deg,var(--fg),#1E293B);color:#fff;text-align:center;padding:80px 0 48px;position:relative;overflow:hidden}.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0,rgba(0,82,255,.3),transparent 60%);pointer-events:none}.cover::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none}.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat-item{background:var(--muted);border-radius:var(--radius-lg);padding:20px;text-align:center}.stat-item .icon{font-size:28px;margin-bottom:8px}.stat-item .value{font-family:var(--font-display);font-size:1.5rem}.stat-item .label{font-size:11px;color:var(--muted-fg);margin-top:4px}.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.photo-item{aspect-ratio:1;background:var(--muted);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:40px;color:#CBD5E1;cursor:pointer;transition:all .2s;overflow:hidden}.photo-item:hover{transform:scale(1.03)}.photo-item img{width:100%;height:100%;object-fit:cover}.ai-summary{background:linear-gradient(135deg,#EFF6FF,#FFF);border:1px solid #DBEAFE;border-radius:var(--radius-lg);padding:24px}@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}@media(max-width:768px){.container{padding:0 16px}.stats-grid{grid-template-columns:repeat(2,1fr)}.cover{padding:48px 0 32px}}</style>
 </head>
@@ -43,45 +44,18 @@
 </main>
 
 <script>
-const tripData={
-  beijing:{name:'北京之旅',dates:'2025.12.20 - 2025.12.24',days:[
-    {day:1,w:'☀️ 晴',places:'故宫 → 天安门 → 景山公园'},
-    {day:2,w:'⛅ 多云',places:'八达岭长城 → 鸟巢 → 水立方'},
-    {day:3,w:'☀️ 晴',places:'颐和园 → 圆明园 → 北大'},
-    {day:4,w:'🌧 小雪',places:'798艺术区 → 三里屯 → 簋街'},
-    {day:5,w:'☀️ 晴',places:'天坛 → 前门大街 → 返程'}
-  ],stats:{days:5,places:15,expense:4200,members:2,walk:'48km',farthest:'长城'},
-  summary:'这段北京之旅，我们走过了5天，从故宫的红墙金瓦到长城的壮丽山脊，每一帧都是难忘的回忆。冬日的北京虽然寒冷，但阳光下的颐和园冰面和热腾腾的涮羊肉温暖了整个旅途。最难忘的是在景山顶上看日落，整个故宫尽收眼底。',
-  tags:['故宫日落','长城壮景','涮羊肉','胡同咖啡','798艺术区'],
-  expenseData:[{value:1800,name:'餐饮'},{value:800,name:'交通'},{value:900,name:'住宿'},{value:500,name:'门票'},{value:200,name:'购物'}],
-  photos:['1508804185872-d7badad00f7d','1547981609-4b6bfe67ca0b','1476514525535-07fb3b4ae5f1','1469854523086-cc02fe5d8800','1488646953014-85cb44e25828','1527631746610-bca00a040d60']
-  },
-  shanghai:{name:'上海之旅',dates:'2026.05.10 - 2026.05.13',days:[
-    {day:1,w:'☀️ 晴',places:'外滩 → 南京路 → 豫园'},
-    {day:2,w:'⛅ 多云',places:'田子坊 → 新天地 → 法租界'},
-    {day:3,w:'🌧 小雨',places:'迪士尼乐园'},
-    {day:4,w:'☀️ 晴',places:'武康路 → 安福路 → 返程'}
-  ],stats:{days:4,places:12,expense:3800,members:2,walk:'32km',farthest:'迪士尼'},
-  summary:'四天上海之旅，从外滩的万国建筑到法租界的梧桐树影，魔都的魅力在每一个转角。迪士尼的烟花是此行的高光时刻，田子坊的弄堂咖啡馆让人流连忘返。上海的精致，藏在武康路的一杯手冲和安福路的一块蛋糕里。',
-  tags:['外滩夜景','迪士尼烟花','法租界骑行','弄堂咖啡','小笼包'],
-  expenseData:[{value:1500,name:'餐饮'},{value:600,name:'交通'},{value:1000,name:'住宿'},{value:500,name:'门票'},{value:200,name:'购物'}],
-  photos:['1508804185872-d7badad00f7d','1547981609-4b6bfe67ca0b','1476514525535-07fb3b4ae5f1','1469854523086-cc02fe5d8800','1488646953014-85cb44e25828','1527631746610-bca00a040d60']
-  },
-  dali:{name:'大理之旅',dates:'2026.03.05 - 2026.03.07',days:[
-    {day:1,w:'☀️ 晴',places:'洱海骑行 → 大理古城 → 洋人街'},
-    {day:2,w:'☀️ 晴',places:'苍山索道 → 寂照庵 → 喜洲古镇'},
-    {day:3,w:'⛅ 多云',places:'双廊古镇 → 环海东路 → 返程'}
-  ],stats:{days:3,places:10,expense:2400,members:2,walk:'25km',farthest:'双廊'},
-  summary:'三天大理，洱海的风和苍山的云是最好的疗愈。骑行在环海路上，蓝得不真实的天和水让人忘记时间。寂照庵的素斋和满院多肉是意外的惊喜，喜洲的稻田和白色照壁像一幅画。',
-  tags:['洱海骑行','苍山落日','寂照庵多肉','喜洲稻田','白族美食'],
-  expenseData:[{value:800,name:'餐饮'},{value:500,name:'交通'},{value:700,name:'住宿'},{value:200,name:'门票'},{value:200,name:'购物'}],
-  photos:['1508804185872-d7badad00f7d','1547981609-4b6bfe67ca0b','1476514525535-07fb3b4ae5f1','1469854523086-cc02fe5d8800','1488646953014-85cb44e25828','1527631746610-bca00a040d60']
-  }
-};
-
 const params=new URLSearchParams(window.location.search);
-const name=params.get('trip')||'beijing';
-const trip=tripData[name]||tripData.beijing;
+const trip=getTripById(params.get('trip'))||loadTrips()[0];
+if(!trip){document.body.innerHTML='<div style="text-align:center;padding:100px;color:var(--muted-fg);"><h2>旅行不存在</h2><a href="index.html">返回首页</a></div>';}
+const tripData={
+  dates:trip.startDate+' - '+trip.endDate,
+  days:(trip.days||[]).map((d,i)=>({day:i+1,w:d.weather||'☀️ 晴',places:(d.places||[]).map(p=>p.name).join(' → ')||'自由探索'})),
+  stats:{days:trip.days?.length||0,places:(trip.days||[]).reduce((s,d)=>s+(d.places?.length||0),0),expense:(trip.expenses||[]).reduce((s,e)=>s+e.amount,0),members:trip.members||1,walk:'--',farthest:(trip.days||[])[0]?.places?.[0]?.name||'--'},
+  summary:trip.summary||'AI 总结尚未生成，点击下方按钮生成',
+  tags:trip.tags||['旅行','回忆'],
+  expenseData:['餐饮','交通','住宿','门票','购物','其他'].map(cat=>({name:cat,value:(trip.expenses||[]).filter(e=>e.cat===cat).reduce((s,e)=>s+e.amount,0)})).filter(d=>d.value>0),
+  photos:['1508804185872-d7badad00f7d','1547981609-4b6bfe67ca0b','1476514525535-07fb3b4ae5f1','1469854523086-cc02fe5d8800','1488646953014-85cb44e25828','1527631746610-bca00a040d60']
+};
 const colors=['#EF4444','#F59E0B','#8B5CF6','#0052FF','#EC4899'];
 
 document.getElementById('coverTitle').innerHTML=trip.name.replace('之旅','<span class="gradient-text">之旅</span>');
@@ -111,8 +85,27 @@ document.getElementById('dailyRecap').innerHTML=trip.days.map((d,i)=>`
   </div>
 `).join('');
 
-document.getElementById('aiSummary').textContent=trip.summary;
-document.getElementById('aiTags').innerHTML=trip.tags.map(t=>`<span class="tag tag-blue">${t}</span>`).join('');
+const SUPABASE_URL='https://vddipatvlyvciolwabqh.supabase.co',SUPABASE_KEY='sb_publishable_4ogDVBGxhuJTZrRb0RtuPg_6e77MnA8';
+async function callAIJournal(tripData){try{const r=await fetch(SUPABASE_URL+'/functions/v1/ai-journal',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+SUPABASE_KEY},body:JSON.stringify(tripData)});const d=await r.json();return r.ok?d:null;}catch(e){return null;}}
+
+function showSummary(t){
+  document.getElementById('aiSummary').textContent=t.summary;
+  document.getElementById('aiTags').innerHTML=(t.tags||t.highlights||[]).map(tg=>`<span class="tag tag-blue">${tg}</span>`).join('');
+}
+
+showSummary(trip);
+
+async function regenerateAI(){
+  document.getElementById('aiSummary').textContent='🤖 AI 正在生成...';
+  const data={destination:trip.destination,startDate:trip.startDate,endDate:trip.endDate,numDays:trip.days?.length||trip.stats?.days,members:trip.members||trip.stats?.members,places:(trip.days||[]).flatMap(d=>(d.places||[]).map(p=>p.name)),expenses:trip.expenses||[],highlights:trip.tags||[]};
+  const aiResult=await callAIJournal(data);
+  if(aiResult&&aiResult.coverSummary){trip.summary=aiResult.coverSummary;trip.tags=aiResult.highlights||[];showSummary(trip);saveTrips(loadTrips().map(t=>t.id===trip.id?trip:t));}
+  else{document.getElementById('aiSummary').textContent='AI 生成失败，请重试';}
+}
+
+// Add AI regenerate button
+const aiBox=document.querySelector('.ai-summary');
+if(aiBox){const btn=document.createElement('button');btn.textContent='🤖 AI 重新生成';btn.className='btn btn-outline';btn.style.cssText='margin-top:12px;font-size:12px;padding:6px 14px;';btn.onclick=regenerateAI;aiBox.appendChild(btn);}
 document.getElementById('photos').innerHTML=trip.photos.map(id=>`<div class="photo-item"><img src="https://images.unsplash.com/photo-${id}?w=400&q=80" alt="旅行照片" loading="lazy"></div>`).join('');
 
 document.addEventListener('DOMContentLoaded',()=>{

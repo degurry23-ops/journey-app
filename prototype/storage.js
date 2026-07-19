@@ -132,8 +132,8 @@ function addTrip(trip) {
   const newTrip = {
     ...trip,
     id: 'trip-' + Date.now(),
-    status: 'planning',
-    expenses: [],
+    status: trip.status || 'planning',
+    expenses: trip.expenses || [],
     created: new Date().toISOString()
   };
   trips.unshift(newTrip);
@@ -141,11 +141,11 @@ function addTrip(trip) {
   return newTrip;
 }
 
-function updateTrip(trip) {
+function updateTrip(id, updates) {
   const trips = loadTrips();
-  const i = trips.findIndex(t => t.id === trip.id);
-  if (i >= 0) { trips[i] = { ...trips[i], ...trip }; saveTrips(trips); }
-  return trips;
+  const i = trips.findIndex(t => t.id === id);
+  if (i >= 0) { trips[i] = { ...trips[i], ...updates }; saveTrips(trips); return trips[i]; }
+  return null;
 }
 
 function deleteTrip(id) {
