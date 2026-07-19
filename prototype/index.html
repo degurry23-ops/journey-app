@@ -381,22 +381,8 @@
         <span class="label" style="color:#8B5CF6;">旅行日志</span>
       </div>
     </div>
-    <div class="journal-scroll">
-      <a href="journal.html?trip=sample-3" class="card journal-mini" style="text-decoration:none;color:inherit;">
-        <div style="font-size:40px;margin-bottom:12px;">📖</div>
-        <div style="font-weight:600;font-size:15px;">上海</div>
-        <div style="font-size:12px;color:var(--muted-fg);margin-top:4px;">4天 · 2026.05</div>
-      </a>
-      <a href="journal.html?trip=dali" class="card journal-mini" style="text-decoration:none;color:inherit;">
-        <div style="font-size:40px;margin-bottom:12px;">📖</div>
-        <div style="font-weight:600;font-size:15px;">大理</div>
-        <div style="font-size:12px;color:var(--muted-fg);margin-top:4px;">3天 · 2026.03</div>
-      </a>
-      <a href="journal.html?trip=beijing" class="card journal-mini" style="text-decoration:none;color:inherit;">
-        <div style="font-size:40px;margin-bottom:12px;">📖</div>
-        <div style="font-weight:600;font-size:15px;">北京</div>
-        <div style="font-size:12px;color:var(--muted-fg);margin-top:4px;">5天 · 2025.12</div>
-      </a>
+    <div class="journal-scroll" id="journalScroll">
+      <div style="text-align:center;padding:20px;color:var(--muted-fg);">加载中...</div>
     </div>
   </div>
 </section>
@@ -488,7 +474,7 @@
   }
 
   // Journal cards
-  const journalSection=document.querySelector('.journal-scroll');
+  const journalSection=document.getElementById('journalScroll');
   if(journalSection&&completed.length){
     journalSection.innerHTML=completed.map(t=>`
       <a href="journal.html?trip=${t.id}" class="card journal-mini" style="text-decoration:none;color:inherit;">

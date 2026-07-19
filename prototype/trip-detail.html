@@ -89,10 +89,10 @@ const btnArea=document.querySelector('main.container > a.btn');
 if(btnArea){
   if(trip.status==='planning'){
     btnArea.textContent='✈️ 开始旅行';
-    btnArea.onclick=function(){updateTrip(trip.id,{status:.traveling.,readiness:Math.max(trip.readiness||30,80)});location.reload();};
+    btnArea.onclick=function(){updateTrip(trip.id,{status:'traveling',readiness:Math.max(trip.readiness||30,80)});location.reload();};
   }else if(trip.status==='traveling'){
     btnArea.textContent='🏁 结束旅行，生成日志';
-    btnArea.onclick=function(){trip.status='completed';trip.readiness=100;updateTrip(trip.id,{status:.completed.,readiness:100});location.href='journal.html?trip='+trip.id;};
+    btnArea.onclick=function(){trip.status='completed';trip.readiness=100;updateTrip(trip.id,{status:'completed',readiness:100});location.href='journal.html?trip='+trip.id;};
   }else{
     btnArea.textContent='📖 查看旅行日志';
     btnArea.href='journal.html?trip='+trip.id;
