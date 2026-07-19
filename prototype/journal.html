@@ -44,14 +44,16 @@
 </main>
 
 <script>
+var tripData;
+try{
 const params=new URLSearchParams(window.location.search);
 const trip=getTripById(params.get('trip'))||loadTrips()[0];
 if(!trip){document.body.innerHTML='<div style="text-align:center;padding:100px;color:var(--muted-fg);"><h2>旅行不存在</h2><a href="index.html">返回首页</a></div>';}
-const tripData={
+tripData={
   dates:trip.startDate+' - '+trip.endDate,
   days:(trip.days||[]).map((d,i)=>({day:i+1,w:d.weather||'☀️ 晴',places:(d.places||[]).map(p=>p.name).join(' → ')||'自由探索'})),
   stats:{days:trip.days?.length||0,places:(trip.days||[]).reduce((s,d)=>s+(d.places?.length||0),0),expense:(trip.expenses||[]).reduce((s,e)=>s+e.amount,0),members:trip.members||1,walk:'--',farthest:(trip.days||[])[0]?.places?.[0]?.name||'--'},
-  summary:tripData.summary||'AI 总结尚未生成，点击下方按钮生成',
+  summary:trip.summary||'AI 总结尚未生成，点击下方按钮生成',
   tags:tripData.tags||['旅行','回忆'],
   expenseData:['餐饮','交通','住宿','门票','购物','其他'].map(cat=>({name:cat,value:(trip.expenses||[]).filter(e=>e.cat===cat).reduce((s,e)=>s+e.amount,0)})).filter(d=>d.value>0),
   photos:['1508804185872-d7badad00f7d','1547981609-4b6bfe67ca0b','1476514525535-07fb3b4ae5f1','1469854523086-cc02fe5d8800','1488646953014-85cb44e25828','1527631746610-bca00a040d60']
@@ -116,6 +118,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
   window.addEventListener('resize',()=>chart.resize());
 });
+}catch(e){document.body.innerHTML='<div style="text-align:center;padding:40px;color:red;"><h2>Error</h2><pre>'+e.message+'</pre><p>Stack: '+e.stack+'</p></div>';}
 </script>
 </body>
 </html>
