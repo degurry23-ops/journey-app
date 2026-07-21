@@ -16,13 +16,13 @@ function load() {
       const raw = fs.readFileSync(DB_PATH, 'utf-8');
       data = JSON.parse(raw);
       // Ensure all collections exist
-      ['trips', 'days', 'places', 'expenses', 'photos'].forEach(k => {
+      ['trips', 'days', 'places', 'expenses', 'photos', 'users'].forEach(k => {
         if (!data[k]) data[k] = [];
       });
     }
   } catch (e) {
     console.warn('DB load error, starting fresh:', e.message);
-    data = { trips: [], days: [], places: [], expenses: [], photos: [] };
+    data = { trips: [], days: [], places: [], expenses: [], photos: [], users: [] };
   }
 }
 
@@ -97,6 +97,14 @@ const db = {
     byTrip: (tripId) => data.photos.filter(p => p.trip_id === tripId).sort((a, b) => (b.created || '').localeCompare(a.created || '')),
     insert: (photo) => { data.photos.push(photo); save(); return photo; },
     delete: (id) => { data.photos = data.photos.filter(p => p.id !== id); save(); }
+  },
+
+  users: {
+    all: () => [...data.users],
+    get: (id) => data.users.find(u => u.id === id) || null,
+    getByUsername: (username) => data.users.find(u => u.username === username) || null,
+    insert: (user) => { data.users.push(user); save(); return user; },
+    delete: (id) => { data.users = data.users.filter(u => u.id !== id); save(); }
   }
 };
 

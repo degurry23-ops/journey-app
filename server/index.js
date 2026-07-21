@@ -10,6 +10,7 @@ const tripsRouter = require('./routes/trips');
 const expensesRouter = require('./routes/expenses');
 const photosRouter = require('./routes/photos');
 const aiRouter = require('./routes/ai');
+const { router: authRouter, authMiddleware } = require('./routes/auth');
 const { db } = require('./db');
 
 // Auto-seed on first deploy
@@ -25,7 +26,10 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// API Routes
+// Auth routes (public)
+app.use('/api/auth', authRouter);
+
+// Protected API Routes (auth optional for now, trips filter by userId if provided)
 app.use('/api/trips', tripsRouter);
 app.use('/api/trips/:tripId/expenses', expensesRouter);
 app.use('/api/trips/:tripId/photos', photosRouter);

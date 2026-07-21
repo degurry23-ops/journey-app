@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>登录 — Journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="styles.css">
+<script src="utils.js"></script>
+<style>
+  .auth-container { max-width: 400px; margin: 60px auto; padding: 0 24px; }
+  .auth-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 40px 32px; box-shadow: 0 4px 16px rgba(0,0,0,.04); }
+  .auth-input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: var(--radius); font-size: 16px; margin-bottom: 16px; outline: none; font-family: var(--font-body); transition: border-color .2s; }
+  .auth-input:focus { border-color: var(--accent); }
+</style>
+</head>
+<body style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);">
+
+<div class="auth-container" style="width:100%;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <a href="index.html" style="font-family:var(--font-display);font-size:24px;color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+      <span style="width:36px;height:36px;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;"><i class="fas fa-map-marker-alt"></i></span>
+      Journey
+    </a>
+  </div>
+  <div class="auth-card">
+    <h2 style="font-family:var(--font-display);font-size:1.5rem;text-align:center;margin-bottom:8px;">欢迎回来</h2>
+    <p style="text-align:center;color:var(--muted-fg);font-size:14px;margin-bottom:28px;">登录你的 Journey 账户</p>
+    <input type="text" id="username" class="auth-input" placeholder="用户名" autocomplete="username">
+    <input type="password" id="password" class="auth-input" placeholder="密码" autocomplete="current-password">
+    <button class="btn btn-primary btn-lg btn-full" onclick="doLogin()" style="margin-bottom:16px;">登录</button>
+    <p style="text-align:center;font-size:13px;color:var(--muted-fg);">还没有账户？<a href="register.html" style="color:var(--accent);text-decoration:none;font-weight:500;">注册</a></p>
+    <p style="text-align:center;font-size:12px;color:var(--muted-fg);margin-top:12px;"><a href="index.html" style="color:var(--muted-fg);">跳过，先看看</a></p>
+  </div>
+</div>
+
+<script>
+var API = (function() {
+  var base = window.location.origin;
+  if (!base.match(/:\d+/)) base += ':3001';
+  return { base: base };
+})();
+
+async function doLogin() {
+  var u = document.getElementById('username').value.trim();
+  var p = document.getElementById('password').value.trim();
+  if (!u || !p) { showToast('请输入用户名和密码', 'warning'); return; }
+
+  try {
+    var r = await fetch(API.base + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, password: p })
+    });
+    var d = await r.json();
+    if (!r.ok) { showToast(d.error || '登录失败', 'error'); return; }
+    localStorage.setItem('journey_token', d.token);
+    localStorage.setItem('journey_user', JSON.stringify(d.user));
+    showToast('登录成功', 'success');
+    setTimeout(function() { location.href = 'index.html'; }, 500);
+  } catch(e) {
+    showToast('网络错误', 'error');
+  }
+}
+
+document.getElementById('password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>

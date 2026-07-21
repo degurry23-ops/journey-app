@@ -6,6 +6,13 @@
   var API_BASE = window.location.origin.replace(':8080', ':3001').replace(':3000', ':3001');
   if (!API_BASE.match(/:\d+/)) API_BASE += ':3001';
 
+  function getAuthHeaders() {
+    var token = localStorage.getItem('journey_token');
+    return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
+  if (!API_BASE.match(/:\d+/)) API_BASE += ':3001';
+
   // ── Network status ──
   var isOnline = true;
   window.addEventListener('online', function() {
