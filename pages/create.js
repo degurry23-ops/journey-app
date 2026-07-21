@@ -85,7 +85,9 @@ safeRender(function() {
       s.chips.forEach(function(c) {
         html += '<span class="chip-btn" onclick="wizPick(\'' + c + '\', this)">' + c + '</span>';
       });
+      html += '<span class="chip-btn" onclick="showCustomInput(this)" style="border-style:dashed;">✏️ 其他...</span>';
       html += '</div>';
+      html += '<div class="btn-next"><button class="btn btn-primary btn-lg" id="customNextBtn" style="display:none;" onclick="wizNextCustom()">下一步 <i class="fas fa-arrow-right"></i></button></div>';
 
     } else if (s.type === 'styleChips') {
       html += '<div class="chip-grid" style="max-width:440px;margin:0 auto;">';
@@ -133,6 +135,26 @@ safeRender(function() {
     el.classList.add('selected');
     answers[steps[step].key] = val;
     setTimeout(function() { advance(); }, 250);
+  };
+
+  // ── Custom input for flexible options ──
+  window.showCustomInput = function(el) {
+    // Replace the clicked chip with an input
+    el.outerHTML = '<span style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--radius);border:2px solid var(--accent);background:#fff;">' +
+      '<input type="text" id="customInput" class="main-input" placeholder="输入自定义..." style="border:none;padding:0;font-size:15px;width:120px;text-align:center;outline:none;" autocomplete="off" onkeydown="if(event.key===\'Enter\')wizNextCustom()">' +
+      '<button class="btn btn-primary btn-sm" onclick="wizNextCustom()" style="padding:6px 14px;font-size:13px;">确定</button></span>';
+    setTimeout(function() {
+      var inp = document.getElementById('customInput');
+      if (inp) inp.focus();
+    }, 100);
+  };
+
+  window.wizNextCustom = function() {
+    var inp = document.getElementById('customInput');
+    var val = inp ? inp.value.trim() : '';
+    if (!val) { showToast('请输入', 'warning'); return; }
+    answers[steps[step].key] = val;
+    advance();
   };
 
   window.wizPickSuggestion = function(val) {
@@ -217,9 +239,14 @@ safeRender(function() {
 
     window._tripData = { name:(answers.destination||'未知')+'之旅', destination:answers.destination||'', startDate:startDate, endDate:endDate.toISOString().split('T')[0], members:numMembers, days:tripDays, budget:numBudget, emoji:'🌏', readiness:30 };
 
-    // Hide step dots
+    // Hide step dots & break out of wizard grid for full-width result
     var dotsEl = document.getElementById('stepDots');
     if (dotsEl) dotsEl.style.display = 'none';
+    // Make questionArea full width
+    questionArea.style.gridColumn = '1 / -1';
+    questionArea.style.maxWidth = '800px';
+    questionArea.style.margin = '0 auto';
+    questionArea.style.width = '100%';
 
     var totalPlaces = tripDays.reduce(function(s,d){ return s+(d.places?d.places.length:0); },0);
     var dest = answers.destination||'';
