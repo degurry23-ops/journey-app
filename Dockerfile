@@ -15,6 +15,9 @@ COPY *.html *.css *.js ./
 COPY pages/ ./pages/
 COPY components/ ./components/
 
+ENV PUBLIC_DIR=.
+ENV PORT=3001
+
 EXPOSE 3001
 
 CMD ["node", "index.js"]

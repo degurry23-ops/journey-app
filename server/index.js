@@ -29,8 +29,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Serve Frontend Static Files
-const publicDir = path.join(__dirname, '..');
+// Serve Frontend Static Files (local: ../, Docker: ./)
+const publicDir = process.env.PUBLIC_DIR || path.join(__dirname, '..');
 app.use(express.static(publicDir, {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.js') || filePath.endsWith('.css') || filePath.endsWith('.html')) {
