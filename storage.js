@@ -353,16 +353,19 @@ function generateTripPlan(destination, startDate, numDays, members, budget, pref
     });
   }
 
+  var budgetPerDay = budget ? Math.round(budget / numDays) : 800;
+  var totalBudget = (budget || 5000) * (members || 1);
+
   return {
     name: destination + '之旅',
     destination,
     startDate,
     endDate: new Date(new Date(startDate).getTime() + (numDays-1)*86400000).toISOString().split('T')[0],
-    days: numDays,
+    days: days,
     members,
     budget,
     preferences,
-    days: days,
+    estimatedBudget: members * (budget || 5000),
     emoji: '🌏',
     readiness: 30
   };
