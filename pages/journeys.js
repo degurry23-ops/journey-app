@@ -1,21 +1,29 @@
-/* Journey — Trip List Page (V2 — Action Console) */
+/* Journey — Trip List (V3 — Travel Console) */
 
 safeRender(function() {
   var trips = loadTrips();
   var today = new Date().toISOString().split('T')[0];
 
-  var counts = {
-    all: trips.length,
-    planning: trips.filter(function(t) { return t.status === 'planning'; }).length,
-    traveling: trips.filter(function(t) { return t.status === 'traveling'; }).length,
-    completed: trips.filter(function(t) { return t.status === 'completed'; }).length
-  };
+  // ── Sort: active first, planning by date asc, completed by date desc ──
+  trips.sort(function(a, b) {
+    var order = { traveling: 0, planning: 1, completed: 2 };
+    var oa = order[a.status] !== undefined ? order[a.status] : 3;
+    var ob = order[b.status] !== undefined ? order[b.status] : 3;
+    if (oa !== ob) return oa - ob;
+    if (a.status === 'traveling') return 0;
+    if (a.status === 'planning') return (a.startDate || '').localeCompare(b.startDate || '');
+    return (b.endDate || '').localeCompare(a.endDate || '');
+  });
 
-  // Tab names consistent: 计划中 / 进行中 / 已完成
-  var tabKeys = ['all', 'planning', 'traveling', 'completed'];
-  var tabLabels = ['全部', '计划中', '进行中', '已完成'];
+  var counts = { all: trips.length };
+  ['planning','traveling','completed'].forEach(function(s) {
+    counts[s] = trips.filter(function(t) { return t.status === s; }).length;
+  });
 
-  // Destination theming
+  var tabKeys = ['all','planning','traveling','completed'];
+  var tabLabels = ['全部','计划中','进行中','已完成'];
+
+  // ── Destination theming ──
   var destThemes = {
     '日本东京': { color: '#DC2626', bg: 'linear-gradient(135deg,#FEF2F2,#FEE2E2)', emoji: '🇯🇵' },
     '四川成都': { color: '#EA580C', bg: 'linear-gradient(135deg,#FFF7ED,#FFEDD5)', emoji: '🐼' },
@@ -27,14 +35,25 @@ safeRender(function() {
     '泰国曼谷': { color: '#0891B2', bg: 'linear-gradient(135deg,#ECFEFF,#CFFAFE)', emoji: '🇹🇭' }
   };
 
-  function getTheme(dest) {
-    for (var k in destThemes) { if (dest && dest.indexOf(k.replace(/^(日本|韩国|泰国|四川|云南)/,'')) >= 0) return destThemes[k]; }
-    return { color: 'var(--accent)', bg: 'linear-gradient(135deg,var(--muted),var(--border))', emoji: '🌏' };
+  function getTheme(dest, emoji) {
+    for (var k in destThemes) {
+      if (dest && dest.indexOf(k.replace(/^(日本|韩国|泰国|四川|云南)/,'')) >= 0) return destThemes[k];
+    }
+    return { color: 'var(--accent)', bg: 'linear-gradient(135deg,var(--muted),var(--border))', emoji: emoji || '🌏' };
   }
 
-  // Update tabs
+  // ── Safe HTML ──
+  function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── Update tabs ──
   document.querySelectorAll('.tab').forEach(function(t, i) {
-    t.textContent = tabLabels[i] + ' (' + counts[tabKeys[i]] + ')';
+    var key = tabKeys[i];
+    if (counts[key] > 0) {
+      t.textContent = tabLabels[i] + ' (' + counts[key] + ')';
+    } else {
+      t.textContent = tabLabels[i];
+      t.style.opacity = '0.5';
+    }
   });
 
   // ── Render ──
@@ -42,9 +61,10 @@ safeRender(function() {
     var c = document.getElementById('tripList');
     var emptyMsg = document.getElementById('emptyFilterMsg');
     if (emptyMsg) emptyMsg.style.display = 'none';
+    // Reset tab opacities
+    document.querySelectorAll('.tab').forEach(function(t) { t.style.opacity = (counts[tabKeys[Array.from(t.parentElement.children).indexOf(t)]] > 0) ? '1' : '0.5'; });
 
     if (!trips.length) {
-      // Absolute empty: new user
       c.innerHTML =
         '<div class="empty-state" style="grid-column:1/-1;">' +
           '<span style="font-size:56px;display:block;margin-bottom:16px;">🌅</span>' +
@@ -56,7 +76,6 @@ safeRender(function() {
     }
 
     if (!list.length) {
-      // Filter empty
       c.innerHTML = '';
       if (emptyMsg) {
         emptyMsg.style.display = 'block';
@@ -66,54 +85,70 @@ safeRender(function() {
     }
 
     c.innerHTML = list.map(function(t) {
-      var theme = getTheme(t.destination);
-      var dayCount = t.days instanceof Array ? t.days.length : (t.days || 0);
+      var theme = getTheme(t.destination, t.emoji);
+      var dayCount = t.days instanceof Array ? t.days.length : 0;
       var placeCount = t.days instanceof Array ? t.days.reduce(function(s, d) { return s + (d.places ? d.places.length : 0); }, 0) : 0;
-      var totalExp = (t.expenses || []).reduce(function(s, e) { return s + e.amount; }, 0);
+      var totalExp = (t.expenses || []).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
       var photos = loadPhotos(t.id) || [];
-      var placeNames = t.days instanceof Array ? t.days.slice(0, 3).reduce(function(arr, d) { return arr.concat((d.places||[]).map(function(p){return p.name;})); }, []) : [];
+      var placeNames = t.days instanceof Array ? t.days.slice(0,3).reduce(function(arr, d) { return arr.concat((d.places||[]).map(function(p){return p.name;})); }, []) : [];
       var extraPlaces = Math.max(0, placeCount - 3);
+      var readiness = (t.readiness != null) ? t.readiness : 0;
 
-      // Status-specific bottom section
+      // ── Status-specific content ──
       var actionHTML = '';
       if (t.status === 'traveling') {
+        // Progress: Day X/Y
         var daysGone = daysBetween(t.startDate, today);
         var currentDay = Math.min(dayCount, Math.max(1, daysGone + 1));
-        actionHTML = '<div class="card-action"><div class="card-action-row">' +
-          '<span>📍 Day ' + currentDay + '/' + dayCount + '</span>' +
-          (totalExp > 0 ? '<span>💰 ¥' + totalExp.toLocaleString() + '</span>' : '') +
-          '<span style="margin-left:auto;color:var(--accent);font-weight:600;">今日旅程 →</span>' +
-        '</div></div>';
+        var pct = dayCount > 0 ? Math.round(currentDay / dayCount * 100) : 0;
+        actionHTML = '<div class="card-action">' +
+          '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted-fg);">' +
+            '<span>Day ' + currentDay + '/' + (dayCount || '?') + '</span>' +
+            '<div style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:var(--success);border-radius:2px;"></div></div>' +
+            '<span>' + pct + '%</span>' +
+          '</div>' +
+          (placeCount ? '<div style="font-size:12px;color:var(--muted-fg);margin-top:6px;">今日 ' + (placeCount/dayCount).toFixed(0) + ' 个地点' + (totalExp > 0 ? ' · 已消费 ¥' + totalExp.toLocaleString() : '') + '</div>' : '') +
+        '</div>';
       } else if (t.status === 'planning') {
-        actionHTML = '<div class="card-action"><div class="card-action-row">' +
-          '<span>📋 准备度 ' + (t.readiness || 30) + '%</span>' +
-          '<span style="margin-left:auto;color:var(--accent);font-weight:600;">完善行程 →</span>' +
-        '</div></div>';
+        // Readiness bar
+        var missing = [];
+        if (dayCount < 2) missing.push('行程');
+        if ((t.members||1) < 2) missing.push('同行人');
+        if (!t.budget) missing.push('预算');
+        actionHTML = '<div class="card-action">' +
+          '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted-fg);margin-bottom:4px;">' +
+            '<span>准备度 ' + readiness + '%</span>' +
+            '<div style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;"><div style="width:' + readiness + '%;height:100%;background:linear-gradient(90deg,var(--warning),var(--accent));border-radius:2px;"></div></div>' +
+          '</div>' +
+          (missing.length ? '<div style="font-size:11px;color:var(--warning);">还差：' + missing.join('、') + '</div>' : '') +
+          (t.startDate ? '<div style="font-size:11px;color:var(--muted-fg);margin-top:2px;">' + (Math.max(0, daysBetween(today, t.startDate))) + '天后出发</div>' : '') +
+        '</div>';
       } else {
-        actionHTML = '<div class="card-action"><div class="card-action-row">' +
-          (photos.length ? '<span>📷 ' + photos.length + '张照片</span>' : '') +
-          (totalExp > 0 ? '<span>💰 ¥' + totalExp.toLocaleString() + '</span>' : '') +
-          (t.summary ? '<span style="font-size:12px;opacity:.7;">' + t.summary.slice(0, 30) + '...</span>' : '') +
-          '<span style="margin-left:auto;color:var(--accent);font-weight:600;">查看回忆 →</span>' +
-        '</div></div>';
+        // Completed stats
+        var daysRecorded = dayCount || 0;
+        actionHTML = '<div class="card-action">' +
+          '<div style="display:flex;gap:16px;font-size:12px;color:var(--muted-fg);">' +
+            (daysRecorded ? '<span>📆 ' + daysRecorded + '天行程</span>' : '') +
+            (photos.length ? '<span>📷 ' + photos.length + '张照片</span>' : '') +
+            (totalExp > 0 ? '<span>💰 ¥' + totalExp.toLocaleString() + '</span>' : '') +
+          '</div>' +
+          (t.summary ? '<div style="font-size:12px;color:var(--muted-fg);margin-top:4px;font-style:italic;">' + esc(t.summary.slice(0, 50)) + (t.summary.length > 50 ? '...' : '') + '</div>' : '') +
+        '</div>';
       }
 
       return '<a href="trip-detail.html?id=' + t.id + '" class="journey-card" style="border-left:4px solid ' + theme.color + ';">' +
-        // Header
-        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">' +
-          '<span style="font-size:32px;">' + (t.emoji || theme.emoji || '🌏') + '</span>' +
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">' +
+          '<span style="font-size:32px;">' + esc(t.emoji || theme.emoji || '🌏') + '</span>' +
           '<div style="flex:1;min-width:0;">' +
-            '<div style="font-weight:700;font-size:16px;">' + t.name + '</div>' +
-            '<div style="font-size:13px;color:var(--muted-fg);">' + t.startDate + ' - ' + t.endDate + ' · ' + dayCount + '天 · ' + (t.members||1) + '人</div>' +
+            '<div style="font-weight:700;font-size:16px;">' + esc(t.name) + '</div>' +
+            '<div style="font-size:13px;color:var(--muted-fg);">' + esc(t.startDate) + ' - ' + esc(t.endDate) + ' · ' + (dayCount || '?') + '天 · ' + (t.members||1) + '人</div>' +
           '</div>' +
           '<span class="tag tag-sm ' + (t.status==='planning'?'tag-amber':t.status==='traveling'?'tag-green':'tag-gray') + '">' + (t.status==='planning'?'计划中':t.status==='traveling'?'进行中':'已完成') + '</span>' +
         '</div>' +
-        // Place preview
         (placeNames.length ? '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">' +
-          placeNames.slice(0,3).map(function(n) { return '<span class="place-chip">' + n + '</span>'; }).join('') +
+          placeNames.slice(0,3).map(function(n) { return '<span class="place-chip">' + esc(n) + '</span>'; }).join('') +
           (extraPlaces > 0 ? '<span class="place-chip" style="background:var(--muted);">+' + extraPlaces + '</span>' : '') +
-        '</div>' : '') +
-        // Action bar
+        '</div>' : (dayCount === 0 ? '<div style="font-size:12px;color:var(--muted-fg);margin-bottom:8px;">行程待完善</div>' : '')) +
         actionHTML +
       '</a>';
     }).join('');
@@ -122,7 +157,8 @@ safeRender(function() {
   window.filterTrips = function(status, el) {
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
     el.classList.add('active');
-    render(status === 'all' ? trips : trips.filter(function(t) { return t.status === status; }), status);
+    var filtered = status === 'all' ? trips : trips.filter(function(t) { return t.status === status; });
+    render(filtered, status);
   };
 
   render(trips, 'all');

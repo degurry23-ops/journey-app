@@ -8,8 +8,11 @@ function loadTrips() {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return getSampleTrips();
     var data = JSON.parse(raw);
-    // Guard: if stored data is empty or not an array, fall back to samples
     if (!Array.isArray(data) || data.length === 0) return getSampleTrips();
+    data.forEach(function(t) {
+      if (t.expenses) t.expenses.forEach(function(e) { e.amount = Number(e.amount) || 0; });
+      if (t.readiness == null) t.readiness = 0;
+    });
     return data;
   } catch(e) { return getSampleTrips(); }
 }
