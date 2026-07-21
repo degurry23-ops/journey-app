@@ -1,6 +1,9 @@
 /* Journey — Seed Database with Sample Data */
 
-const { db } = require('./db');
+const { initDB, db } = require('./db');
+
+async function seed() {
+  await initDB();
 
 // Clear existing data
 db.trips.all().forEach(t => db.trips.delete(t.id));
@@ -247,4 +250,7 @@ SAMPLE_TRIPS.forEach(trip => {
   });
 });
 
-console.log('Sample data seeded: ' + SAMPLE_TRIPS.length + ' trips');
+  console.log('Sample data seeded: ' + SAMPLE_TRIPS.length + ' trips');
+}
+
+seed();
