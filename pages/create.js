@@ -261,10 +261,6 @@ safeRender(function() {
 
   sendBtn.addEventListener('click', send);
   answer.addEventListener('keydown', function(e) { if (e.key === 'Enter') send(); });
-  // Show destination suggestions on first step
-  var firstS = steps[0];
-  if (firstS.suggestions) {
-    addChat(firstS.q, 'ai', { suggestions: firstS.suggestions });
-  }
+  // Init — don't show chat until user clicks "开始规划"
   updateInput();
 });
