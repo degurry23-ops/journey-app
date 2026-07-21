@@ -12,6 +12,7 @@ const photosRouter = require('./routes/photos');
 const aiRouter = require('./routes/ai');
 const weatherRouter = require('./routes/weather');
 const exchangeRouter = require('./routes/exchange');
+const analyticsRouter = require('./routes/analytics');
 const { router: authRouter, authMiddleware } = require('./routes/auth');
 const { initDB, db } = require('./db');
 
@@ -32,6 +33,7 @@ app.use('/api/trips/:tripId/photos', photosRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/weather', weatherRouter);
 app.use('/api/exchange-rate', exchangeRouter);
+app.use('/api/analytics', analyticsRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

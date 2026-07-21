@@ -105,6 +105,17 @@ async function initDB() {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS analytics (
+      id TEXT PRIMARY KEY,
+      event TEXT NOT NULL,
+      page TEXT DEFAULT '',
+      ip TEXT DEFAULT '',
+      ua TEXT DEFAULT '',
+      created TEXT DEFAULT ''
+    )
+  `);
+
   save();
   console.log('SQLite DB ready');
 }
@@ -234,6 +245,31 @@ const dbAPI = {
       return user;
     }
   }
-};
+users: {
+    all: () => all('SELECT * FROM users'),
+    get: (id) => get('SELECT * FROM users WHERE id = ?', [id]),
+    getByUsername: (username) => get('SELECT * FROM users WHERE username = ?', [username]),
+    insert: (user) => {
+      const cols = Object.keys(user).join(',');
+      const vals = Object.values(user);
+      run('INSERT INTO users (' + cols + ') VALUES (' + vals.map(() => '?').join(',') + ')', vals);
+      return user;
+    }
+  },
+
+  analytics: {
+    insert: (entry) => {
+      try {
+        const cols = Object.keys(entry).join(',');
+        const vals = Object.values(entry);
+        db.run('INSERT INTO analytics (' + cols + ') VALUES (' + vals.map(() => '?').join(',') + ')', vals);
+        save();
+      } catch(e) {}
+    },
+    count: (event) => {
+      try { const r = get('SELECT COUNT(*) as cnt FROM analytics WHERE event = ?', [event]); return r ? r.cnt : 0; }
+      catch(e) { return 0; }
+    }
+  }
 
 module.exports = { initDB, db: dbAPI, genId, DB_PATH };

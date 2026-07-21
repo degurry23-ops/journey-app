@@ -43,6 +43,7 @@ safeRender(function() {
 
   // ── Start ──
   window.startWizard = function() {
+    if (typeof track === 'function') track('create_started');
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('wizard').style.display = 'block';
     questionArea = document.getElementById('questionArea');
@@ -328,6 +329,7 @@ safeRender(function() {
 
   window.confirmTrip = function() {
     if (!window._tripData) return;
+    if (typeof track === 'function') track('create_completed');
     // Read edited values
     var nameEl = document.getElementById('editTripName');
     var dateEl = document.getElementById('editStartDate');

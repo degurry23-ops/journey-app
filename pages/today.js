@@ -26,6 +26,7 @@ safeRender(function() {
 
   // ── Greeting ──
   var hour = new Date().getHours();
+  if (typeof track === 'function') track('today_opened');
   var greeting = hour < 11 ? '☀️ 早上好' : hour < 14 ? '🌤 中午好' : hour < 18 ? '🌅 下午好' : '🌙 晚上好';
   var el = document.getElementById('todayGreeting');
   if (el) el.textContent = greeting;

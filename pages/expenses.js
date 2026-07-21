@@ -71,7 +71,7 @@ safeRender(function() {
       h += '<div style="font-size:14px;opacity:.5;margin-bottom:4px;">≈ ' + cur.sym + expenses.reduce(function(s,e){return s+e.amount;},0).toLocaleString() + ' ' + cur.code + '</div>';
     } else {
       var totalLocal = expenses.reduce(function(s,e){return s+e.amount;},0);
-      h += '<div style="font-size:2.5rem;font-weight:700;margin:4px 0;">' + cur.sym + totalLocal.toLocaleString() + '</div>';
+      h += '<div style="font-size:2.5rem;font-weight:700;margin:4px 0;">' + cur.sym + totalLocal.toLocaleString() + ' <span style="font-size:14px;opacity:.7;">CNY</span></div>';
     }
     h += '<div style="display:flex;gap:16px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.1);">';
     h += '<div><span style="font-size:11px;opacity:.5;">人均</span><div style="font-weight:700;">¥' + Math.round(totalCNY/(trip.members||1)).toLocaleString() + '</div></div>';
