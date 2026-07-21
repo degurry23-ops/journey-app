@@ -632,3 +632,17 @@ section.dark .stat-item .label { color: rgba(255,255,255,0.5); }
   opacity: 0.5;
   transition: 0s;
 }
+
+/* Memory Cards */
+.memory-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+}
+.memory-card:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .hero { padding: 32px 0 20px; }
+  #memoriesGrid { grid-template-columns: 1fr !important; }
+}

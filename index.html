@@ -44,69 +44,65 @@
 <body>
 <div id="header-placeholder"></div>
 
-<section class="hero"><div class="container hero-grid"><div class="hero-text">
-  <div class="section-badge"><span class="dot pulse"></span><span class="label" id="todayBadge">Journey</span></div>
-  <h1>准备好下一次<span class="gradient-text">旅行</span>了吗？</h1>
-  <p class="subtitle">AI 帮你规划路线 · 记录每个瞬间 · 珍藏整段旅行<br>一场旅行，只需要一个 App</p>
-  <div style="margin-top:32px;display:flex;gap:12px;flex-wrap:wrap;">
-    <a href="create.html" class="btn btn-primary btn-lg">创建新旅行 <i class="fas fa-arrow-right"></i></a>
-    <a href="journeys.html" class="btn btn-outline btn-lg">查看我的旅行</a>
-  </div>
-</div>
-<div class="hide-mobile" style="position:relative;display:flex;align-items:center;justify-content:center;">
-  <div style="position:relative;width:320px;height:320px;">
-    <div style="position:absolute;inset:0;border:2px dashed rgba(0,82,255,0.2);border-radius:50%;animation:spin 60s linear infinite;"></div>
-    <div style="position:absolute;top:10%;left:10%;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:24px;width:100px;height:100px;box-shadow:0 20px 40px rgba(0,82,255,0.3);" class="animate-float"></div>
-    <div style="position:absolute;bottom:15%;right:10%;background:white;border:1px solid var(--border);border-radius:20px;width:120px;height:80px;box-shadow:0 10px 30px rgba(0,0,0,0.08);" class="animate-float" style="animation-delay:1.5s;"></div>
-    <div style="position:absolute;top:40%;right:5%;width:16px;height:16px;border-radius:50%;background:var(--success);box-shadow:0 0 12px rgba(16,185,129,0.4);" class="pulse-dot"></div>
-  </div>
-</div></div></section>
-
-<section class="dark" style="padding:48px 0;"><div class="container">
-  <div class="section-badge" style="border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);margin-bottom:28px;">
-    <span class="dot" style="background:var(--accent2);"></span><span class="label" style="color:rgba(255,255,255,0.8);">旅行概览</span></div>
-  <div class="stats-grid">
-    <div class="stat-item"><div class="value accent">0</div><div class="label">次旅行</div></div>
-    <div class="stat-item"><div class="value green">0</div><div class="label">进行中</div></div>
-    <div class="stat-item"><div class="value purple">0</div><div class="label">已完成</div></div>
-    <div class="stat-item"><div class="value amber">0</div><div class="label">即将出发</div></div>
-  </div>
-</div></section>
-
-<section style="padding-top:64px;padding-bottom:24px;"><div class="container">
-  <div class="card card-gradient countdown-card animate-in"><div style="position:relative;z-index:2;">
-    <h3 id="countdownLabel">距离下一次旅行</h3>
-    <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0 16px;"><span class="number">--</span><span class="unit">天<span id="countdownDest" style="font-size:0.5em;opacity:0.7;margin-left:8px;"></span></span></div>
-    <div style="display:flex;align-items:center;gap:12px;"><span id="countdownEmoji" style="font-size:24px;">🌏</span>
-    <div><div id="countdownTripName" style="font-weight:600;font-size:18px;">暂无计划</div><div id="countdownTripSub" style="font-size:14px;opacity:0.7;">创建你的第一次旅行吧</div></div></div>
-    <div id="countdownProgress" style="margin-top:16px;display:none;align-items:center;gap:12px;">
-      <div style="flex:1;background:rgba(255,255,255,0.15);border-radius:999px;height:6px;overflow:hidden;">
-        <div class="animate-progress" style="width:0%;height:100%;background:white;border-radius:999px;"></div>
+<!-- Hero: shows next trip or CTA -->
+<section class="hero" id="homeHero" style="padding:60px 0 40px;">
+  <div class="container">
+    <div id="heroContent">
+      <div class="section-badge"><span class="dot pulse"></span><span class="label" id="todayBadge">Journey</span></div>
+      <h1 style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);line-height:1.2;">准备好下一次<span class="gradient-text">旅行</span>了吗？</h1>
+      <p class="subtitle" style="font-size:16px;color:var(--muted-fg);margin-top:12px;">AI 帮你规划路线 · 记录每个瞬间 · 珍藏整段旅行</p>
+      <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+        <a href="create.html" class="btn btn-primary btn-lg">开始规划 <i class="fas fa-arrow-right"></i></a>
+        <a href="journeys.html" class="btn btn-outline btn-lg">我的旅行</a>
       </div>
-      <span id="countdownPct" style="font-size:14px;">0%</span>
     </div>
-  </div></div>
+  </div>
+</section>
+
+<!-- Next Trip Highlight -->
+<section id="nextTripSection" style="padding:0 0 32px;display:none;"></section>
+
+<!-- Active Journey -->
+<section id="activeSection" style="padding:0 0 32px;display:none;">
+  <div class="container">
+    <div class="card card-gradient" id="activeTripCard" style="cursor:pointer;padding:32px;">
+      <div style="position:relative;z-index:2;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;"><span class="tag tag-green">● 正在进行</span></div>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <span id="activeEmoji" style="font-size:48px;">✈️</span>
+          <div style="flex:1;">
+            <h2 id="activeTripName" style="font-family:var(--font-display);font-size:1.8rem;"></h2>
+            <p id="activeTripMeta" style="opacity:.7;font-size:14px;margin-top:4px;"></p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;">
+          <a id="activeTimelineLink" href="#" class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;">📋 今日行程</a>
+          <a id="activeMapLink" href="#" class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;">🗺 地图</a>
+          <a id="activeExpenseLink" href="#" class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;">💰 记账</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats strip -->
+<section style="padding:0 0 40px;"><div class="container">
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);gap:12px;">
+    <div class="stat-item"><div class="value accent" id="statTotal">0</div><div class="label">次旅行</div></div>
+    <div class="stat-item"><div class="value green" id="statActive">0</div><div class="label">进行中</div></div>
+    <div class="stat-item"><div class="value purple" id="statCompleted">0</div><div class="label">已完成</div></div>
+    <div class="stat-item"><div class="value amber" id="statUpcoming">0</div><div class="label">即将出发</div></div>
+  </div>
 </div></section>
 
-<section style="padding-top:40px;padding-bottom:40px;"><div class="container">
-  <div class="section-header"><div class="section-badge"><span class="dot pulse"></span><span class="label">正在进行</span></div></div>
-  <div class="trips-grid animate-stagger"></div>
+<!-- Travel Memories -->
+<section id="memoriesSection" style="padding:0 0 60px;"><div class="container">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <h2 style="font-family:var(--font-display);font-size:1.5rem;">📖 旅行<span class="gradient-text">记忆</span></h2>
+    <a href="journeys.html" style="font-size:14px;color:var(--accent);text-decoration:none;">全部 →</a>
+  </div>
+  <div id="memoriesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;"></div>
 </div></section>
-
-<section style="padding-top:0;padding-bottom:40px;"><div class="container">
-  <div class="section-header"><div class="section-badge"><span class="dot" style="background:var(--warning);"></span><span class="label" style="color:var(--warning);">即将出发</span></div></div>
-  <div class="trips-grid animate-stagger"></div>
-</div></section>
-
-<section style="padding-top:0;padding-bottom:64px;"><div class="container">
-  <div class="section-header"><div class="section-badge"><span class="dot" style="background:#8B5CF6;"></span><span class="label" style="color:#8B5CF6;">旅行日志</span></div></div>
-  <div class="journal-scroll" id="journalScroll"><div class="empty-state" style="min-width:100%;"><i class="fas fa-book"></i><h3>暂无日志</h3><p>完成旅行后会在这里显示</p></div></div>
-</div></section>
-
-<section class="dark" style="padding:64px 0;text-align:center;"><div class="container">
-  <h2 style="font-family:var(--font-display);font-size:clamp(2rem,3vw,3rem);line-height:1.15;margin-bottom:16px;">准备好开始你的<span class="gradient-text">旅程</span>了吗？</h2>
-  <p style="font-size:18px;color:rgba(255,255,255,0.6);margin-bottom:32px;">AI 旅行规划师随时准备为你规划下一段完美旅行</p>
-  <a href="create.html" class="btn btn-primary btn-lg" style="font-size:18px;padding:20px 40px;">免费开始规划 <i class="fas fa-arrow-right"></i></a>
 </div></section>
 
 <footer><div class="container"><p>Made with 💙 Journey · Every Journey Deserves to Be Remembered</p></div></footer>
