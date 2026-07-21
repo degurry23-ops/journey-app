@@ -51,7 +51,7 @@
           emoji: t.emoji, budget: t.budget, preferences: t.preferences,
           summary: t.summary, tags: t.tags || [],
           expenses: (t.expenses || []).map(function (e) {
-            return { id: e.id, cat: e.category, amount: e.amount, note: e.note, payer: e.payer, date: e.date, dayId: e.day_id };
+            return { id: e.id, cat: e.category, amount: e.amount, note: e.note, payer: e.payer, date: e.date, dayId: e.day_id, currency: e.currency || 'CNY', amountCNY: e.amountCNY || e.amount, participants: e.participants || [] };
           })
         };
       });

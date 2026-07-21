@@ -171,7 +171,10 @@ var API = {
       note: e.note || '',
       payer: e.payer || '我',
       date: e.date || '',
-      dayId: e.day_id || e.dayId || ''
+      dayId: e.day_id || e.dayId || '',
+      currency: e.currency || 'CNY',
+      amountCNY: e.amountCNY || e.amount || 0,
+      participants: e.participants || []
     };
   }
 };
