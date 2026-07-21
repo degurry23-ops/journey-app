@@ -7,8 +7,8 @@
 function renderHeader(currentPage) {
   const pages = [
     { key: 'home', label: '首页', href: 'index.html', icon: 'fa-home' },
-    { key: 'journeys', label: '旅行', href: 'journeys.html', icon: 'fa-map' },
-    { key: 'create', label: '创建', href: 'create.html', icon: 'fa-plus-circle' },
+    { key: 'journeys', label: '我的旅行', href: 'journeys.html', icon: 'fa-suitcase' },
+    { key: 'create', label: '✨ AI 规划', href: 'create.html', icon: 'fa-magic' },
   ];
 
   const navLinks = pages.map(p =>

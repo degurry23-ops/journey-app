@@ -85,13 +85,25 @@
   </div>
 </section>
 
-<!-- Stats strip -->
+<!-- Travel Footprint -->
 <section style="padding:0 0 40px;"><div class="container">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+    <span style="font-size:20px;">🗺</span>
+    <h2 style="font-family:var(--font-display);font-size:1.2rem;">我的旅行<span class="gradient-text">足迹</span></h2>
+  </div>
   <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);gap:12px;">
-    <div class="stat-item"><div class="value accent" id="statTotal">0</div><div class="label">次旅行</div></div>
-    <div class="stat-item"><div class="value green" id="statActive">0</div><div class="label">进行中</div></div>
-    <div class="stat-item"><div class="value purple" id="statCompleted">0</div><div class="label">已完成</div></div>
-    <div class="stat-item"><div class="value amber" id="statUpcoming">0</div><div class="label">即将出发</div></div>
+    <div class="stat-item" style="background:linear-gradient(135deg,rgba(0,82,255,.05),rgba(77,124,255,.05));border-radius:var(--radius-lg);">
+      <div class="value accent" id="statCities">0</div><div class="label">座城市</div>
+    </div>
+    <div class="stat-item" style="background:linear-gradient(135deg,rgba(16,185,129,.05),rgba(52,211,153,.05));border-radius:var(--radius-lg);">
+      <div class="value green" id="statPlaces">0</div><div class="label">个足迹</div>
+    </div>
+    <div class="stat-item" style="background:linear-gradient(135deg,rgba(139,92,246,.05),rgba(167,139,250,.05));border-radius:var(--radius-lg);">
+      <div class="value purple" id="statPhotos">0</div><div class="label">张照片</div>
+    </div>
+    <div class="stat-item" style="background:linear-gradient(135deg,rgba(245,158,11,.05),rgba(251,191,36,.05));border-radius:var(--radius-lg);">
+      <div class="value amber" id="statMemories">0</div><div class="label">篇回忆</div>
+    </div>
   </div>
 </div></section>
 
@@ -103,7 +115,11 @@
   </div>
   <div id="memoriesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;"></div>
 </div></section>
-</div></section>
+
+<!-- Floating AI Assistant -->
+<a href="create.html" class="fab" style="bottom:90px;right:20px;z-index:40;text-decoration:none;" title="AI 旅行助手">
+  <i class="fas fa-magic"></i>
+</a>
 
 <footer><div class="container"><p>Made with 💙 Journey · Every Journey Deserves to Be Remembered</p></div></footer>
 
