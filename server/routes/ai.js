@@ -5,14 +5,41 @@ const router = express.Router();
 const { db, genId } = require('../db');
 
 // Config from environment
-const AI_PROVIDER = process.env.AI_PROVIDER || 'openai';    // openai | claude | mock
+const AI_PROVIDER = process.env.AI_PROVIDER || 'openai';
 const AI_API_KEY = process.env.AI_API_KEY || '';
 const AI_MODEL = process.env.AI_MODEL || 'gpt-4o-mini';
 const AI_BASE_URL = process.env.AI_BASE_URL || 'https://api.openai.com/v1';
+const AI_DAILY_LIMIT = parseInt(process.env.AI_DAILY_LIMIT || '20');  // max requests per IP per day
+const AI_MAX_TOKENS = parseInt(process.env.AI_MAX_TOKENS || '1500');
+
+// ── Rate Limiter (per IP, daily) ──
+const rateLimit = {};
+function checkRateLimit(ip) {
+  const today = new Date().toISOString().split('T')[0];
+  const key = ip + '_' + today;
+  if (!rateLimit[key]) rateLimit[key] = 0;
+  rateLimit[key]++;
+  return rateLimit[key] <= AI_DAILY_LIMIT;
+}
+function getRateLimitInfo(ip) {
+  const today = new Date().toISOString().split('T')[0];
+  const key = ip + '_' + today;
+  return { used: rateLimit[key] || 0, limit: AI_DAILY_LIMIT };
+}
 
 // ── AI Trip Plan Generation ──
-// POST /api/ai/plan-trip
 router.post('/plan-trip', async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+
+  if (!checkRateLimit(ip)) {
+    const info = getRateLimitInfo(ip);
+    return res.status(429).json({
+      error: '今日AI使用次数已用完，请明天再试',
+      used: info.used,
+      limit: info.limit
+    });
+  }
+
   const { destination, startDate, numDays, members, budget, preferences } = req.body;
 
   if (!destination || !startDate || !numDays) {
@@ -21,18 +48,29 @@ router.post('/plan-trip', async (req, res) => {
 
   try {
     const plan = await generateTripPlan({ destination, startDate, numDays, members, budget, preferences });
+    plan._rateLimit = getRateLimitInfo(ip);
     res.json(plan);
   } catch (e) {
     console.error('AI trip plan error:', e.message);
-    // Fall back to mock generator
     const plan = mockTripPlan({ destination, startDate, numDays, members, budget, preferences });
+    plan._rateLimit = getRateLimitInfo(ip);
     res.json(plan);
   }
 });
 
 // ── AI Journal Generation ──
-// POST /api/ai/journal
 router.post('/journal', async (req, res) => {
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+
+  if (!checkRateLimit(ip)) {
+    const info = getRateLimitInfo(ip);
+    return res.status(429).json({
+      error: '今日AI使用次数已用完，请明天再试',
+      used: info.used,
+      limit: info.limit
+    });
+  }
+
   const { destination, startDate, endDate, numDays, members, places, expenses, highlights } = req.body;
 
   if (!destination) {
@@ -41,10 +79,12 @@ router.post('/journal', async (req, res) => {
 
   try {
     const journal = await generateJournal({ destination, startDate, endDate, numDays, members, places, expenses, highlights });
+    journal._rateLimit = getRateLimitInfo(ip);
     res.json(journal);
   } catch (e) {
     console.error('AI journal error:', e.message);
     const journal = mockJournal({ destination, startDate, endDate, numDays, members, places, expenses, highlights });
+    journal._rateLimit = getRateLimitInfo(ip);
     res.json(journal);
   }
 });

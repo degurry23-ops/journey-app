@@ -1,6 +1,36 @@
 /* Journey — Settings Page */
 
 safeRender(function() {
+  // ── User Profile ──
+  var STORAGE_USER = 'journey_user';
+  function loadProfile() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_USER)) || {}; } catch(e) { return {}; }
+  }
+  function saveProfile(p) { localStorage.setItem(STORAGE_USER, JSON.stringify(p)); }
+
+  var profile = loadProfile();
+  var nameEl = document.getElementById('profileName');
+  if (nameEl && profile.nickname) nameEl.textContent = profile.nickname;
+
+  window.editProfile = function() {
+    var name = prompt('输入你的昵称：', profile.nickname || '');
+    if (name && name.trim()) {
+      profile.nickname = name.trim();
+      saveProfile(profile);
+      if (nameEl) nameEl.textContent = profile.nickname;
+      showToast('已更新', 'success');
+    }
+  };
+
+  window.editApiKey = function() {
+    var key = prompt('输入你的 AI API Key（DeepSeek/OpenAI）：\n\n使用自己的 Key 不受每日次数限制', profile.apiKey || '');
+    if (key !== null) {
+      profile.apiKey = key.trim();
+      saveProfile(profile);
+      showToast(key.trim() ? 'API Key 已保存' : 'API Key 已清除', 'success');
+    }
+  };
+
   // Export
   window.exportData = function() {
     var trips = loadTrips();
