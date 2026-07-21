@@ -17,10 +17,7 @@ safeRender(function() {
     var heroContent = document.getElementById('heroContent');
     if (heroContent) {
       heroContent.innerHTML =
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">' +
-          '<div style="width:40px;height:40px;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">🤖</div>' +
-          '<div><div style="font-weight:600;font-size:14px;">AI 旅行助手</div><div style="font-size:12px;color:var(--muted-fg);">你的' + (next.destination || '') + '旅行正在完善中</div></div>' +
-        '</div>' +
+        '<p style="font-size:14px;color:var(--muted-fg);margin-bottom:12px;">✨ AI 正在完善你的' + (next.destination || '') + '旅行</p>' +
         '<h1 style="font-family:var(--font-display);font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.12;margin-bottom:8px;">' + (next.emoji || '🌏') + ' ' + (next.destination || '') + '<span class="gradient-text"> · ' + dayCount + '日</span></h1>' +
         '<p style="font-size:16px;color:var(--muted-fg);margin-bottom:24px;">' + next.startDate + ' 出发 · ' + daysLeft + '天后 · 👥 ' + (next.members || 1) + '人</p>' +
         // AI status card
@@ -74,7 +71,9 @@ safeRender(function() {
           '</div>';
         }).join('') + '</div>';
     }
-    if (metaEl) metaEl.innerHTML = (todayDay ? '<div style="display:flex;align-items:center;gap:12px;font-size:14px;opacity:.7;"><span>' + (todayDay.weather || '☀️') + '</span></div>' : '') + routeHTML;
+    // Build AI tip
+    var aiTip = todayDay && todayDay.tip ? todayDay.tip : '今天天气不错，享受旅程吧~';
+    if (metaEl) metaEl.innerHTML = (todayDay ? '<div style="display:flex;align-items:center;gap:12px;font-size:14px;opacity:.7;margin-bottom:4px;"><span>' + (todayDay.weather || '☀️') + '</span><span style="font-size:11px;opacity:.5;">🤖 ' + aiTip + '</span></div>' : '') + routeHTML;
 
     if (tlLink) { tlLink.href = 'today.html?trip=' + activeTrip.id; tlLink.textContent = '📋 今日旅程'; }
     if (mapLink) mapLink.href = 'map.html?trip=' + activeTrip.id;

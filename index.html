@@ -48,9 +48,9 @@
 <section class="hero" id="homeHero" style="padding:60px 0 40px;">
   <div class="container">
     <div id="heroContent">
-      <div class="section-badge"><span class="dot pulse"></span><span class="label" id="todayBadge">Journey</span></div>
-      <h1 style="font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);line-height:1.2;">准备好下一次<span class="gradient-text">旅行</span>了吗？</h1>
-      <p class="subtitle" style="font-size:16px;color:var(--muted-fg);margin-top:12px;">AI 帮你规划路线 · 记录每个瞬间 · 珍藏整段旅行</p>
+      <p style="font-size:14px;color:var(--muted-fg);margin-bottom:12px;" id="heroStatus">✨ AI 旅行助手已就绪</p>
+      <h1 style="font-family:var(--font-display);font-size:clamp(2.2rem,5vw,3.5rem);line-height:1.12;">你的下一段旅程，<br>交给<span class="gradient-text">AI</span>规划</h1>
+      <p class="subtitle" style="font-size:17px;color:var(--muted-fg);margin-top:14px;">从目的地到回忆，Journey 陪伴整个旅程</p>
       <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
         <a href="create.html" class="btn btn-primary btn-lg">开始规划 <i class="fas fa-arrow-right"></i></a>
         <a href="journeys.html" class="btn btn-outline btn-lg">我的旅行</a>
@@ -128,8 +128,10 @@
 <script>renderHeader('home');</script>
 <script>
   var now = new Date();
-  var days = ['日','一','二','三','四','五','六'];
-  document.getElementById('todayBadge').textContent = now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日 · 星期'+days[now.getDay()];
+  var hour = now.getHours();
+  var greeting = hour < 11 ? '☀️ 早上好' : hour < 14 ? '🌤 中午好' : hour < 18 ? '🌅 下午好' : '🌙 晚上好';
+  var el = document.getElementById('heroStatus');
+  if (el) el.textContent = greeting + ' · ✨ AI 旅行助手已就绪';
 </script>
 <script src="pages/home.js"></script>
 </body>
