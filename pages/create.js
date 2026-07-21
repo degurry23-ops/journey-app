@@ -1,280 +1,251 @@
-/* Journey — Create Trip Page (AI Chat + Onboarding) */
+/* Journey — Create Trip Page (V3 — AI Travel Planner) */
 
 safeRender(function() {
-  // ── Templates ──
-  var templates = [
-    { label: '🌸 东京7日漫游', destination: '日本东京', days: 7, members: 2, budget: 8000, preferences: '美食探索', emoji: '🇯🇵' },
-    { label: '🏔 云南慢旅行', destination: '云南大理', days: 5, members: 2, budget: 4000, preferences: '自然风光', emoji: '🏔️' },
-    { label: '🍜 成都美食之旅', destination: '四川成都', days: 4, members: 4, budget: 5000, preferences: '美食探索', emoji: '🐼' },
-    { label: '🏙 上海都市漫游', destination: '上海', days: 3, members: 1, budget: 3000, preferences: '慢节奏体验', emoji: '🌆' }
-  ];
-
-  var tmplContainer = document.getElementById('templates');
-  if (tmplContainer) {
-    tmplContainer.innerHTML = templates.map(function(t) {
-      return '<span onclick="quickTemplate(\'' + t.destination + '\',' + t.days + ',' + t.members + ',' + t.budget + ',\'' + t.preferences + '\')" style="padding:10px 18px;border-radius:var(--radius-lg);font-size:14px;background:var(--card);color:var(--fg);cursor:pointer;transition:all .15s;border:1.5px solid var(--border);white-space:nowrap;">' + t.label + '</span>';
-    }).join('');
-  }
-
-  window.quickTemplate = function(dest, days, members, budget, prefs) {
-    startChat();
-    // Default start date to 2 weeks from now
-    var d = new Date();
-    d.setDate(d.getDate() + 14);
-    var defaultDate = d.toISOString().split('T')[0];
-    answers = { destination: dest, startDate: defaultDate, days: '' + days, members: '' + members, budget: '' + budget, preferences: prefs };
-    step = steps.length - 1;
-    addChat(dest + ' · ' + days + '天 · ' + members + '人 · ' + defaultDate, 'user');
-    generateTrip();
-  };
-
-  window.startChat = function() {
-    var ob = document.getElementById('onboarding');
-    var cp = document.getElementById('chatPhase');
-    if (ob) ob.style.display = 'none';
-    if (cp) { cp.style.display = 'flex'; cp.style.flexDirection = 'column'; }
-    var firstS = steps[0];
-    updateInput();
-    if (firstS.suggestions) {
-      addChat(firstS.q, 'ai', { suggestions: firstS.suggestions });
-    }
-  };
-
   var steps = [
-    { q: 'Hi！想去哪里<span class=\"gradient-text\" style=\"font-weight:600;\">旅行</span>？', icon: '🌏', hint: '输入目的地或点击下方推荐', key: 'destination', placeholder: '例如：日本东京', suggestions: [
-      { label: '🇯🇵 日本东京', value: '日本东京' },
-      { label: '🇨🇳 四川成都', value: '四川成都' },
-      { label: '🇨🇳 上海', value: '上海' },
-      { label: '🇨🇳 北京', value: '北京' },
-      { label: '🇨🇳 重庆', value: '重庆' },
-      { label: '🇰🇷 韩国首尔', value: '韩国首尔' },
-      { label: '🇹🇭 泰国曼谷', value: '泰国曼谷' },
-      { label: '🇨🇳 云南大理', value: '云南大理' }
-    ]},
-    { q: '什么时候出发？', icon: '📅', hint: '选择出发日期', key: 'startDate', placeholder: '选择日期', type: 'date' },
-    { q: '准备玩几天？', icon: '📆', hint: '点击选择天数', key: 'days', placeholder: '', type: 'chips', chips: ['3天','4天','5天','6天','7天','10天'] },
-    { q: '几个人一起？', icon: '👥', hint: '算上你自己哦', key: 'members', placeholder: '', type: 'chips', chips: ['1人','2人','3人','4人','5人+'] },
-    { q: '每人预算大概多少？', icon: '💰', hint: '点击选择预算档位', key: 'budget', placeholder: '', type: 'chips', chips: ['¥3,000','¥5,000','¥8,000','¥12,000','¥20,000','不限'] },
-    { q: '这次旅行更偏向什么风格？', icon: '🎯', hint: '选择一个风格，AI 帮你定制', key: 'preferences', placeholder: '', type: 'styleChips', chips: [
-      { icon: '🍜', label: '美食探索' },
-      { icon: '🏯', label: '文化古迹' },
-      { icon: '🛍', label: '购物逛街' },
-      { icon: '🌿', label: '自然风光' },
-      { icon: '☕', label: '慢节奏体验' },
-      { icon: '🏃', label: '特种兵打卡' },
-      { icon: '📸', label: '拍照圣地' },
-      { icon: '🎭', label: '当地体验' }
+    { key: 'destination', q: '想去哪里<span class=\"gradient-text\">旅行</span>？', icon: '🔍', placeholder: '输入目的地', type: 'text', hint: '输入目的地或点击热门推荐' },
+    { key: 'startDate', q: '什么时候<span class=\"gradient-text\">出发</span>？', icon: '📅', placeholder: '选择出发日期', type: 'date', hint: '选择出发日期' },
+    { key: 'days', q: '准备玩<span class=\"gradient-text\">几天</span>？', icon: '📆', type: 'chips', hint: '选择旅行天数', chips: ['3天','4天','5天','6天','7天','10天'] },
+    { key: 'members', q: '<span class=\"gradient-text\">几个人</span>一起？', icon: '👥', type: 'chips', hint: '包括你自己', chips: ['1人','2人','3人','4人','5人+'] },
+    { key: 'budget', q: '每人<span class=\"gradient-text\">预算</span>多少？', icon: '💰', type: 'chips', hint: '选择预算范围', chips: ['¥3,000','¥5,000','¥8,000','¥12,000','¥20,000','不限'] },
+    { key: 'preferences', q: '喜欢什么<span class=\"gradient-text\">旅行风格</span>？', icon: '🎯', type: 'styleChips', hint: '选一个最符合的', chips: [
+      { icon: '🍜', label: '美食探索' }, { icon: '🏯', label: '文化古迹' }, { icon: '🛍', label: '购物逛街' }, { icon: '🌿', label: '自然风光' },
+      { icon: '☕', label: '慢节奏体验' }, { icon: '🏃', label: '特种兵打卡' }, { icon: '📸', label: '拍照圣地' }, { icon: '🎭', label: '当地体验' }
     ]}
   ];
 
   var step = 0;
   var answers = {};
+  var chat, planFooter, planInputArea;
 
-  var chat = document.getElementById('chat');
-  var answer = document.getElementById('answer');
-  var sendBtn = document.getElementById('sendBtn');
-  var progress = document.getElementById('progress');
-  var stepIcon = document.getElementById('stepIcon');
-  var stepHint = document.getElementById('stepHint');
+  // ── Templates ──
+  var templates = [
+    { label: '🌸 东京7日', dest: '日本东京', days: '7天', members: '2人', budget: '¥8,000', prefs: '美食探索' },
+    { label: '🏔 云南慢旅行', dest: '云南大理', days: '5天', members: '2人', budget: '¥4,000', prefs: '自然风光' },
+    { label: '🍜 成都美食', dest: '四川成都', days: '4天', members: '4人', budget: '¥5,000', prefs: '美食探索' },
+    { label: '🏙 上海漫步', dest: '上海', days: '3天', members: '1人', budget: '¥3,000', prefs: '慢节奏体验' }
+  ];
 
-  if (!chat || !answer || !sendBtn) {
-    document.body.innerHTML = '<div class="empty-state" style="padding-top:100px;"><i class="fas fa-exclamation-triangle"></i><h3>页面加载异常</h3><a href="index.html" class="btn btn-primary">返回首页</a></div>';
-    return;
+  var tmplContainer = document.getElementById('templates');
+  if (tmplContainer) {
+    tmplContainer.innerHTML = templates.map(function(t) {
+      return '<span onclick="quickTemplate(\'' + t.dest + '\',\'' + t.days + '\',\'' + t.members + '\',\'' + t.budget + '\',\'' + t.prefs + '\')" style="padding:10px 18px;border-radius:var(--radius-lg);font-size:14px;background:var(--card);cursor:pointer;transition:all .15s;border:1.5px solid var(--border);white-space:nowrap;">' + t.label + '</span>';
+    }).join('');
   }
 
-  function updateInput() {
-    var s = steps[step];
-    var isChipStep = s.type === 'chips' || s.type === 'styleChips';
-    answer.type = isChipStep ? 'text' : (s.type || 'text');
-    answer.placeholder = isChipStep ? '点击上方选项，或直接输入' : s.placeholder;
-    answer.style.display = '';
-    sendBtn.style.display = '';
-    if (stepIcon) stepIcon.style.display = '';
-    if (stepHint) stepHint.textContent = '第 ' + (step + 1) + '/' + steps.length + ' 步' + (isChipStep ? ' · 点击选项或输入后回车' : ' · 按 Enter 发送');
-    if (stepIcon) stepIcon.textContent = s.icon;
-    if (progress) progress.style.width = (step / steps.length * 100) + '%';
-    answer.focus();
-  }
+  window.quickTemplate = function(dest, days, members, budget, prefs) {
+    startChat();
+    var d = new Date(); d.setDate(d.getDate() + 14);
+    answers = { destination: dest, startDate: d.toISOString().split('T')[0], days: days, members: members, budget: budget, preferences: prefs };
+    step = steps.length;
+    addChatMsg('📍 ' + dest + ' · ' + days + ' · ' + members + ' · ' + budget + ' · ' + prefs, 'user');
+    generateTrip();
+  };
 
-  function addChat(msg, type, extras) {
+  // ── Start ──
+  window.startChat = function() {
+    var ob = document.getElementById('onboarding');
+    var cp = document.getElementById('chatPhase');
+    if (ob) ob.style.display = 'none';
+    if (cp) { cp.style.display = 'flex'; cp.style.flexDirection = 'column'; }
+    chat = document.getElementById('chat');
+    planFooter = document.getElementById('planFooter');
+    planInputArea = document.getElementById('planInputArea');
+    if (planFooter) planFooter.style.display = 'block';
+    addChatMsg(steps[0].q, 'ai');
+    renderPlanFooter(0);
+    renderStepProgress();
+  };
+
+  // ── Chat messages ──
+  function addChatMsg(msg, type) {
     if (!chat) return;
     var d = document.createElement('div');
     d.className = type === 'ai' ? 'chat-ai' : 'chat-user';
-    var html = type === 'ai' ? '<div class="avatar"><i class="fas fa-robot"></i></div>' : '';
-    html += '<div class="bubble">' + msg;
-    if (extras && extras.suggestions) {
-      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">';
-      extras.suggestions.forEach(function(s) {
-        html += '<span data-pick="' + s.value + '" class="pick-chip" style="padding:8px 14px;border-radius:999px;font-size:13px;background:var(--muted);color:var(--fg);cursor:pointer;transition:all .15s;border:1.5px solid var(--border);">' + s.label + '</span>';
-      });
-      html += '</div>';
-    }
-    if (extras && extras.chips) {
-      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">';
-      extras.chips.forEach(function(c) {
-        var label = typeof c === 'string' ? c : (c.icon + ' ' + c.label);
-        var val = typeof c === 'string' ? c : c.label;
-        html += '<span data-pick="' + val + '" class="pick-chip" style="padding:10px 16px;border-radius:var(--radius);font-size:14px;background:var(--muted);color:var(--fg);cursor:pointer;transition:all .15s;border:1.5px solid var(--border);display:inline-flex;align-items:center;gap:6px;">' + label + '</span>';
-      });
-      html += '</div>';
-    }
-    html += '</div>';
+    var html = type === 'ai' ? '<div class="avatar">✨</div>' : '';
+    html += '<div class="bubble">' + msg + '</div>';
     d.innerHTML = html;
     chat.appendChild(d);
     chat.scrollTop = chat.scrollHeight;
   }
 
-  // Event delegation for chip clicks
-  chat.addEventListener('click', function(e) {
-    var chip = e.target.closest('.pick-chip');
-    if (!chip) return;
-    var val = chip.getAttribute('data-pick');
-    if (!val || !answer) return;
-    answer.value = val;
-    // Highlight selected chip
-    var allChips = chat.querySelectorAll('.pick-chip');
-    allChips.forEach(function(c) { c.style.background = 'var(--muted)'; c.style.color = 'var(--fg)'; c.style.borderColor = 'var(--border)'; });
-    chip.style.background = 'var(--accent)'; chip.style.color = '#fff'; chip.style.borderColor = 'var(--accent)';
-    // Auto submit after brief highlight
-    setTimeout(function() { send(); }, 200);
-  });
+  // ── Step progress ──
+  function renderStepProgress() {
+    var el = document.getElementById('stepProgress');
+    if (!el) return;
+    var labels = ['目的地','日期','天数','人数','预算','风格'];
+    el.innerHTML = labels.map(function(l, i) {
+      var done = i < step, current = i === step;
+      return '<span style="display:flex;align-items:center;gap:4px;' + (current ? 'color:var(--accent);font-weight:600;' : done ? 'color:var(--success);' : '') + '">' +
+        (done ? '✓' : '<span style="width:8px;height:8px;border-radius:50%;background:' + (current ? 'var(--accent)' : 'var(--border)') + ';"></span>') +
+        '<span style="white-space:nowrap;">' + l + '</span></span>' +
+        (i < labels.length - 1 ? '<span style="color:var(--border);">·</span>' : '');
+    }).join('');
+  }
 
-  async function send() {
-    if (!answer) return;
-    var val = answer.value.trim();
-    if (!val) return;
-    var s = steps[step];
-    answers[s.key] = val;
-    addChat(val, 'user');
-    answer.value = '';
+  // ── Dynamic footer ──
+  function renderPlanFooter(s) {
+    if (!planInputArea) return;
+    var st = steps[s];
+    var html = '';
 
-    if (step < steps.length - 1) {
-      step++;
-      var nextS = steps[step];
-      var extras = {};
-      if (nextS.suggestions) extras.suggestions = nextS.suggestions;
-      if (nextS.chips) extras.chips = nextS.chips;
-      addChat(nextS.q, 'ai', extras);
-      updateInput();
-      answer.value = '';
+    if (st.type === 'date') {
+      // Date step
+      html += '<div style="display:flex;align-items:center;gap:12px;">' +
+        '<span style="font-size:24px;">' + st.icon + '</span>' +
+        '<input type="date" id="planInput" class="input" style="flex:1;font-size:16px;">' +
+        '<button class="btn btn-primary" onclick="nextStep()" style="white-space:nowrap;border-radius:var(--radius-lg);">下一步 <i class="fas fa-arrow-right"></i></button></div>' +
+        '<p style="font-size:11px;color:var(--muted-fg);text-align:center;margin-top:8px;">' + st.hint + '</p>';
+
+    } else if (st.type === 'chips' || st.type === 'styleChips') {
+      // Chips step — show chips in footer
+      html += '<div style="margin-bottom:12px;">';
+      st.chips.forEach(function(c) {
+        var label = typeof c === 'string' ? c : (c.icon + ' ' + c.label);
+        var val = typeof c === 'string' ? c : c.label;
+        html += '<span onclick="pickChip(\'' + val + '\', this)" style="display:inline-flex;align-items:center;gap:6px;padding:12px 18px;margin:0 6px 8px 0;border-radius:var(--radius-lg);font-size:15px;background:var(--card);border:1.5px solid var(--border);cursor:pointer;transition:all .15s;">' + label + '</span>';
+      });
+      html += '</div>';
+      html += '<p style="font-size:11px;color:var(--muted-fg);text-align:center;">' + st.hint + '</p>';
+
     } else {
+      // Text step — destination
+      html += '<div style="display:flex;align-items:center;gap:12px;">' +
+        '<span style="font-size:24px;">' + st.icon + '</span>' +
+        '<input type="text" id="planInput" class="input" placeholder="' + st.placeholder + '" style="flex:1;font-size:16px;border:none;background:transparent;padding:12px 0;" autocomplete="off">' +
+        '<button class="btn btn-primary" onclick="nextStep()" style="white-space:nowrap;border-radius:var(--radius-lg);">下一步 <i class="fas fa-arrow-right"></i></button></div>';
+    }
+
+    planInputArea.innerHTML = html;
+
+    // Focus input if exists
+    setTimeout(function() {
+      var inp = document.getElementById('planInput');
+      if (inp) inp.focus();
+    }, 100);
+  }
+
+  // ── Chip pick ──
+  window.pickChip = function(val, el) {
+    // Highlight
+    var all = planInputArea.querySelectorAll('span[onclick^=\"pickChip\"]');
+    all.forEach(function(s) { s.style.background = 'var(--card)'; s.style.borderColor = 'var(--border)'; s.style.color = 'var(--fg)'; });
+    el.style.background = 'var(--accent)'; el.style.borderColor = 'var(--accent)'; el.style.color = '#fff';
+    // Store and proceed
+    answers[steps[step].key] = val;
+    addChatMsg(val, 'user');
+    advanceStep();
+  };
+
+  // ── Next step ──
+  window.nextStep = function() {
+    var inp = document.getElementById('planInput');
+    if (!inp) return;
+    var val = inp.value.trim();
+    if (!val) { showToast('请' + steps[step].placeholder, 'warning'); return; }
+    answers[steps[step].key] = val;
+    addChatMsg(val, 'user');
+    advanceStep();
+  };
+
+  // ── Advance ──
+  function advanceStep() {
+    step++;
+    renderStepProgress();
+    if (step < steps.length) {
+      addChatMsg(steps[step].q, 'ai');
+      renderPlanFooter(step);
+    } else {
+      if (planFooter) planFooter.style.display = 'none';
       generateTrip();
     }
   }
 
+  // ── AI Generation ──
   async function generateTrip() {
-    addChat('好的！开始为你规划...', 'ai');
-    // AI progress animation
-    var progressSteps = ['分析最佳旅行时间...','筛选热门地点...','计算路线距离...','生成每日安排...','准备预算方案...'];
+    addChatMsg('好的！正在为你规划...', 'ai');
+
     var progDiv = document.createElement('div');
     progDiv.className = 'chat-ai';
-    progDiv.innerHTML = '<div class="avatar"><i class="fas fa-robot"></i></div><div class="bubble" id="aiProgress"><p style="font-size:13px;color:var(--muted-fg);">🤖 AI 正在规划中...</p></div>';
+    progDiv.innerHTML = '<div class="avatar">✨</div><div class="bubble" id="aiProgress"><p style="font-size:13px;color:var(--muted-fg);">🤖 AI 正在规划中...</p></div>';
     chat.appendChild(progDiv);
     chat.scrollTop = chat.scrollHeight;
 
+    var progressSteps = ['分析最佳旅行时间...','筛选热门地点...','计算路线距离...','生成每日安排...','准备预算方案...'];
     for (var i = 0; i < progressSteps.length; i++) {
       await new Promise(function(r) { setTimeout(r, 400); });
       var pb = document.getElementById('aiProgress');
       if (pb) {
-        pb.innerHTML = '<p style="font-size:13px;color:var(--muted-fg);">🤖 AI 正在规划中...</p>' +
-          progressSteps.slice(0, i + 1).map(function(s) { return '<div style="font-size:12px;color:var(--success);margin-top:4px;">✓ ' + s + '</div>'; }).join('');
+        pb.innerHTML = '<p style="font-size:13px;color:var(--muted-fg);margin-bottom:8px;">🤖 AI 正在规划中...</p>' +
+          progressSteps.slice(0, i + 1).map(function(s) { return '<div style="font-size:12px;color:var(--success);margin-top:3px;">✓ ' + s + '</div>'; }).join('');
       }
-      if (progress) progress.style.width = ((i + 1) / progressSteps.length * 100) + '%';
     }
-    if (progress) progress.style.width = '100%';
-    var footer = document.querySelector('.chat-footer');
-    if (footer) footer.style.display = 'none';
 
     var numDays = parseInt(answers.days || 5);
     var numMembers = parseInt(answers.members || 1);
     var numBudget = parseInt(answers.budget || 5000);
+    var startDate = answers.startDate || new Date().toISOString().split('T')[0];
+    var endDate = new Date(startDate);
+    if (isNaN(endDate.getTime())) endDate = new Date();
+    endDate.setDate(endDate.getDate() + numDays - 1);
+    var endDateStr = endDate.toISOString().split('T')[0];
     var tripDays = null;
 
+    // Try AI API
     try {
-        var aiResult = await callAITripPlan({
-          destination: answers.destination,
-          startDate: answers.startDate,
-          numDays: numDays,
-          members: numMembers,
-          budget: numBudget,
-          preferences: answers.preferences || ''
+      var aiResult = await callAITripPlan({ destination: answers.destination, startDate: startDate, numDays: numDays, members: numMembers, budget: numBudget, preferences: answers.preferences || '' });
+      if (aiResult && aiResult.days && aiResult.days.length) {
+        tripDays = aiResult.days.map(function(d, i) {
+          return { id: 'ai-d' + Date.now() + '-' + i, date: d.date || startDate, weather: d.weather || '☀️ 晴', tip: d.tip || '', places: (d.places || []).map(function(p) {
+            return { id: 'ai-p' + Date.now() + '-' + Math.random().toString(36).slice(2,7), name: p.name, cat: p.category || p.cat || '景点', time: p.time_slot || p.time || '09:00', duration: p.duration || '1h', fee: p.fee || '免费', lat: p.lat || null, lng: p.lng || null };
+          })};
         });
-        if (aiResult && aiResult.days && aiResult.days.length) {
-          tripDays = aiResult.days.map(function(d, i) {
-            return {
-              id: 'ai-d' + Date.now() + '-' + i,
-              date: d.date || answers.startDate,
-              weather: d.weather || '☀️ 晴 25°C',
-              tip: d.tip || '',
-              places: (d.places || []).map(function(p) {
-                return {
-                  id: 'ai-p' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-                  name: p.name, cat: p.category || p.cat || '景点',
-                  time: p.time_slot || p.time || '09:00',
-                  duration: p.duration || '1h', fee: p.fee || '免费',
-                  lat: p.lat || null, lng: p.lng || null
-                };
-              })
-            };
-          });
-        }
-      } catch (e) {}
-
-      // Ensure valid dates
-      var startDate = answers.startDate || new Date().toISOString().split('T')[0];
-      var endDate = new Date(startDate);
-      if (isNaN(endDate.getTime())) endDate = new Date();
-      endDate.setDate(endDate.getDate() + numDays - 1);
-      var endDateStr = endDate.toISOString().split('T')[0];
-
-      if (!tripDays || !tripDays.length) {
-        var plan = generateTripPlan(answers.destination, startDate, numDays, numMembers, numBudget, answers.preferences);
-        tripDays = (plan && plan.days) ? plan.days : [];
       }
+    } catch(e) {}
 
-      // If still no data, show error
-      if (!tripDays || !tripDays.length) {
-        addChat('抱歉，生成失败了。请重试或换个目的地试试', 'ai');
-        var ft2 = document.querySelector('.chat-footer');
-        if (ft2) ft2.style.display = '';
-        updateInput();
-        step = 0;
-        return;
+    // Fallback
+    if (!tripDays || !tripDays.length) {
+      var plan = generateTripPlan(answers.destination, startDate, numDays, numMembers, numBudget, answers.preferences);
+      tripDays = (plan && plan.days) ? plan.days : [];
+    }
+
+    // Error
+    if (!tripDays || !tripDays.length) {
+      addChatMsg('抱歉，生成失败了。请重试。', 'ai');
+      if (planFooter) planFooter.style.display = 'block';
+      step = 0; answers = {};
+      addChatMsg(steps[0].q, 'ai');
+      renderPlanFooter(0);
+      renderStepProgress();
+      return;
+    }
+
+    window._tripData = { name: (answers.destination || '未知') + '之旅', destination: answers.destination || '', startDate: startDate, endDate: endDateStr, members: numMembers, days: tripDays, budget: numBudget, emoji: '🌏', readiness: 30 };
+
+    // Display result
+    var html = '<div style="text-align:center;padding:20px 0 32px;">';
+    html += '<div style="font-size:48px;margin-bottom:8px;">🎉</div>';
+    html += '<h2 style="font-family:var(--font-display);font-size:1.6rem;margin-bottom:4px;">行程已生成！</h2>';
+    html += '<p style="color:var(--muted-fg);font-size:13px;">' + (answers.destination || '') + ' · ' + numDays + '天 · ' + startDate + ' 出发</p></div>';
+
+    for (var d = 0; d < tripDays.length; d++) {
+      var day = tripDays[d];
+      html += '<div class="card animate-in" style="margin-bottom:10px;text-align:left;">';
+      html += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"><span class="tag tag-blue">Day ' + (d+1) + '</span><span style="font-size:13px;color:var(--muted-fg);">' + (day.weather || '☀️ 晴') + '</span></div>';
+      if (day.places && day.places.length) {
+        day.places.forEach(function(pl) {
+          var ci = pl.cat === '美食' ? '🍜' : pl.cat === '咖啡' ? '☕' : pl.cat === '购物' ? '🛍' : pl.cat === '住宿' ? '🏨' : pl.cat === '交通' ? '🚇' : '📍';
+          html += '<div style="display:flex;align-items:center;gap:10px;padding:5px 0;font-size:14px;"><span style="font-family:var(--font-mono);font-size:11px;color:var(--muted-fg);min-width:44px;">' + (pl.time || '09:00') + '</span><span>' + ci + '</span><span>' + pl.name + '</span></div>';
+        });
+      } else {
+        html += '<div style="font-size:13px;color:var(--muted-fg);padding:6px 0;">自由探索</div>';
       }
+      html += '</div>';
+    }
+    html += '<button class="btn btn-primary btn-lg btn-full" style="margin-top:16px;" onclick="confirmTrip()">✈️ 确认行程，开始旅程</button>';
+    html += '<button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="location.reload()">🔄 重新生成</button>';
 
-      window._tripData = {
-        name: (answers.destination || '未知') + '之旅', destination: answers.destination || '',
-        startDate: startDate, endDate: endDateStr,
-        members: numMembers, days: tripDays, budget: numBudget, emoji: '🌏', readiness: 30
-      };
-
-      var html = '<div style="text-align:center;padding:20px 0 40px;">';
-      html += '<div style="font-size:56px;margin-bottom:12px;">🎉</div>';
-      html += '<h2 style="font-family:var(--font-display);font-size:1.8rem;margin-bottom:4px;">行程已生成！</h2>';
-      html += '<p style="color:var(--muted-fg);font-size:14px;">' + (answers.destination || '') + ' · ' + numDays + '天 · ' + startDate + ' 出发</p></div>';
-
-      for (var d = 0; d < tripDays.length; d++) {
-        var day = tripDays[d];
-        html += '<div class="card animate-in" style="margin-bottom:10px;text-align:left;">';
-        html += '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;"><span class="tag tag-blue">Day ' + (d + 1) + '</span><span style="font-size:13px;color:var(--muted-fg);">' + (day.weather || '☀️ 晴') + '</span></div>';
-        if (day.places && day.places.length) {
-          for (var p = 0; p < day.places.length; p++) {
-            var pl = day.places[p];
-            var ci = pl.cat === '美食' ? '🍜' : pl.cat === '咖啡' ? '☕' : pl.cat === '购物' ? '🛍' : pl.cat === '住宿' ? '🏨' : pl.cat === '交通' ? '🚇' : '📍';
-            html += '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:14px;"><span style="font-family:var(--font-mono);font-size:11px;color:var(--muted-fg);min-width:44px;">' + (pl.time || '09:00') + '</span><span style="font-size:16px;">' + ci + '</span><span>' + pl.name + '</span></div>';
-          }
-        } else {
-          html += '<div style="font-size:13px;color:var(--muted-fg);padding:8px 0;">自由探索</div>';
-        }
-        html += '</div>';
-      }
-      html += '<button class="btn btn-primary btn-lg btn-full" style="margin-top:20px;" onclick="confirmTrip()">✈️ 确认行程，开始旅程</button>';
-      html += '<button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="location.reload()">🔄 重新生成</button>';
-
-      var main = document.querySelector('#chatPhase main');
-      if (main) main.innerHTML = html;
-      var ft = document.querySelector('.chat-footer');
-      if (ft) ft.style.display = 'none';
+    chat.innerHTML = html;
+    chat.scrollTop = 0;
   }
 
   window.confirmTrip = function() {
@@ -283,8 +254,11 @@ safeRender(function() {
     location.href = 'trip-detail.html?id=' + t.id;
   };
 
-  sendBtn.addEventListener('click', send);
-  answer.addEventListener('keydown', function(e) { if (e.key === 'Enter') send(); });
-  // Init — don't show chat until user clicks "开始规划"
-  updateInput();
+  // Keyboard support
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && planFooter && planFooter.style.display !== 'none') {
+      var inp = document.getElementById('planInput');
+      if (inp && document.activeElement === inp) { e.preventDefault(); nextStep(); }
+    }
+  });
 });
