@@ -6,11 +6,25 @@
   var API_BASE = window.location.origin.replace(':8080', ':3001').replace(':3000', ':3001');
   if (!API_BASE.match(/:\d+/)) API_BASE += ':3001';
 
+  // ── Network status ──
+  var isOnline = true;
+  window.addEventListener('online', function() {
+    isOnline = true;
+    syncFromAPI();
+    if (typeof showToast === 'function') showToast('网络已恢复，数据已同步', 'success');
+  });
+  window.addEventListener('offline', function() {
+    isOnline = false;
+    if (typeof showToast === 'function') showToast('已离线，使用本地数据', 'warning');
+  });
+
   // ── Init: sync from API to localStorage on first load ──
   async function syncFromAPI() {
+    if (!isOnline && navigator.onLine === false) return;
     try {
       var r = await fetch(API_BASE + '/api/trips');
       if (!r.ok) return;
+      isOnline = true;
       var trips = await r.json();
 
       // Convert to localStorage format
@@ -53,7 +67,16 @@
 
       console.log('[API Bridge] Synced ' + localTrips.length + ' trips from API');
     } catch (e) {
+      isOnline = false;
       console.warn('[API Bridge] Sync failed, using localStorage:', e.message);
+      if (!localStorage.getItem('journey_proto_trips')) {
+        // First time with no network — seed sample data
+        var samples = typeof getSampleTrips === 'function' ? getSampleTrips() : null;
+        if (samples && samples.length) {
+          localStorage.setItem('journey_proto_trips', JSON.stringify(samples));
+          console.log('[API Bridge] Seeded sample data for offline use');
+        }
+      }
     }
   }
 
