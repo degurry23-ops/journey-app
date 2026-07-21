@@ -81,20 +81,21 @@ safeRender(function() {
 
   function updateInput() {
     var s = steps[step];
-    if (s.type === 'chips' || s.type === 'styleChips') {
-      answer.style.display = 'none';
-      sendBtn.parentElement.style.display = 'none';
+    var isChipStep = s.type === 'chips' || s.type === 'styleChips';
+    // Toggle visibility of input elements individually (don't hide parent)
+    answer.style.display = isChipStep ? 'none' : '';
+    sendBtn.style.display = isChipStep ? 'none' : '';
+    if (stepIcon) stepIcon.style.display = isChipStep ? 'none' : '';
+    if (isChipStep) {
       if (stepHint) stepHint.textContent = '第 ' + (step + 1) + '/' + steps.length + ' 步 · 点击选择';
     } else {
-      answer.style.display = '';
-      sendBtn.parentElement.style.display = '';
       answer.type = s.type || 'text';
       answer.placeholder = s.placeholder;
       if (stepHint) stepHint.textContent = '第 ' + (step + 1) + '/' + steps.length + ' 步 · 按 Enter 发送';
     }
     if (stepIcon) stepIcon.textContent = s.icon;
     if (progress) progress.style.width = (step / steps.length * 100) + '%';
-    if (answer.style.display !== 'none') answer.focus();
+    if (!isChipStep) answer.focus();
   }
 
   function addChat(msg, type, extras) {
