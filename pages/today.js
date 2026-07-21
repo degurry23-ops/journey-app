@@ -13,9 +13,13 @@ safeRender(function() {
   if (!(trip.days instanceof Array)) trip.days = [];
 
   // Determine which day is "today" based on trip dates
-  var today = new Date().toISOString().split('T')[0];
-  var todayDayIdx = trip.days.findIndex(function(d) { return d.date === today; });
-  if (todayDayIdx < 0) todayDayIdx = 0; // fallback to first day
+  var todayStr = new Date().toISOString().split('T')[0];
+  var todayDayIdx = trip.days.findIndex(function(d) { return d.date === todayStr; });
+  // Fallback: calculate day index from start date
+  if (todayDayIdx < 0) {
+    var daysSinceStart = daysBetween(trip.startDate, todayStr);
+    todayDayIdx = Math.min(trip.days.length - 1, Math.max(0, daysSinceStart));
+  }
   var day = trip.days[todayDayIdx];
   if (!day) day = trip.days[0];
   if (!day) { showPageError('fa-calendar', '暂无日程', '请先在行程详情中添加日程', 'trip-detail.html?id=' + trip.id, '前往行程详情'); return; }

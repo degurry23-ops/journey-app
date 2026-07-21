@@ -53,10 +53,14 @@ safeRender(function() {
     var expLink = document.getElementById('activeExpenseLink');
 
     var dayCount = activeTrip.days instanceof Array ? activeTrip.days.length : 1;
-    var todayDay = activeTrip.days instanceof Array ? activeTrip.days[0] : null;
+    // Find today's day based on dates
+    var todayStr = new Date().toISOString().split('T')[0];
+    var todayIdx = activeTrip.days instanceof Array ? activeTrip.days.findIndex(function(d) { return d.date === todayStr; }) : -1;
+    if (todayIdx < 0) todayIdx = Math.min(dayCount - 1, Math.max(0, daysBetween(activeTrip.startDate, todayStr)));
+    var todayDay = activeTrip.days instanceof Array ? activeTrip.days[todayIdx] : null;
     var places = todayDay && todayDay.places ? todayDay.places : [];
 
-    if (nameEl) nameEl.textContent = activeTrip.name + ' · Day' + dayCount;
+    if (nameEl) nameEl.textContent = activeTrip.name + ' · Day ' + (todayIdx + 1) + '/' + dayCount;
     if (emojiEl) emojiEl.textContent = activeTrip.emoji || '✈️';
 
     // Build time-based route
