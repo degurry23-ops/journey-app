@@ -160,16 +160,43 @@ safeRender(function() {
       if (!categories[cat].length) return;
       html += '<div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--muted-fg);margin-bottom:4px;font-weight:600;">' + cat + '</div>';
       categories[cat].forEach(function(item) {
-        html += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;padding:4px 0;cursor:pointer;">' +
-          '<input type="checkbox" style="accent-color:var(--accent);"' + (item.checked?' checked':'') + ' onchange="togglePackItem(\'' + item.id + '\')">' +
-          '<span style="' + (item.checked?'text-decoration:line-through;color:var(--muted-fg);':'') + '">' + item.name + '</span>' +
+        html += '<div style="display:flex;align-items:center;gap:6px;font-size:13px;padding:4px 0;">' +
+          '<input type="checkbox" style="accent-color:var(--accent);flex-shrink:0;"' + (item.checked?' checked':'') + ' onchange="togglePackItem(\'' + item.id + '\')">' +
+          '<span style="flex:1;' + (item.checked?'text-decoration:line-through;color:var(--muted-fg);':'') + '">' + item.name + '</span>' +
           (item.note?'<span style="font-size:11px;color:var(--muted-fg);">' + item.note + '</span>':'') +
-          '</label>';
+          '<span onclick="deletePackItem(\'' + item.id + '\')" style="cursor:pointer;color:var(--muted-fg);font-size:14px;padding:2px 6px;">✕</span>' +
+        '</div>';
       });
       html += '</div>';
     });
+    html += '<div style="display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">' +
+      '<select id="newPackCat" style="padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;background:var(--card);">' +
+      ['证件','衣物','电子','洗漱','药品','其他'].map(function(c){return '<option>'+c+'</option>';}).join('') +
+      '</select>' +
+      '<input id="newPackName" class="input" placeholder="添加物品..." style="flex:1;padding:6px 10px;font-size:13px;">' +
+      '<button class="btn btn-primary btn-sm" onclick="addPackItem()" style="white-space:nowrap;">+ 添加</button>' +
+    '</div>';
     container.innerHTML = html;
   }
+
+  window.addPackItem = function() {
+    var nameEl = document.getElementById('newPackName');
+    var catEl = document.getElementById('newPackCat');
+    var name = nameEl ? nameEl.value.trim() : '';
+    if (!name) { showToast('请输入物品名称','warning'); return; }
+    if (!trip.packingList) trip.packingList = getDefaultPackingList(trip);
+    trip.packingList.push({ id: 'pk-' + Date.now(), name: name, cat: (catEl?catEl.value:'其他'), checked: false });
+    saveTrips(loadTrips().map(function(t) { return t.id === trip.id ? trip : t; }));
+    renderPackingList(trip);
+    showToast('已添加','success');
+  };
+
+  window.deletePackItem = function(itemId) {
+    if (!trip.packingList) return;
+    trip.packingList = trip.packingList.filter(function(i) { return i.id !== itemId; });
+    saveTrips(loadTrips().map(function(t) { return t.id === trip.id ? trip : t; }));
+    renderPackingList(trip);
+  };
 
   function getDefaultPackingList(trip) {
     var days = trip.days instanceof Array ? trip.days.length : 4;
