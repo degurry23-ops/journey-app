@@ -207,9 +207,9 @@ safeRender(function() {
       }
     }
 
-    var numDays = parseInt(answers.days || 5);
-    var numMembers = parseInt(answers.members || 1);
-    var numBudget = parseInt(answers.budget || 5000);
+    var numDays = parseInt((answers.days || '5').replace(/[^0-9]/g, '')) || 5;
+    var numMembers = parseInt((answers.members || '1').replace(/[^0-9]/g, '')) || 1;
+    var numBudget = parseInt((answers.budget || '5000').replace(/[^0-9]/g, '')) || 5000;
     var startDate = answers.startDate || new Date().toISOString().split('T')[0];
     var endDate = new Date(startDate);
     if (isNaN(endDate.getTime())) endDate = new Date();

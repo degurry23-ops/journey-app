@@ -85,7 +85,7 @@ async function callAI(systemPrompt, userPrompt) {
 async function generateTripPlan(params) {
   const { destination, startDate, numDays, members, budget, preferences } = params;
 
-  const systemPrompt = `你是一个专业的旅行规划师。根据用户的需求生成详细的旅行计划。你必须返回纯JSON，不要包含markdown代码块标记。
+  const systemPrompt = `你是专业的旅行规划师。根据用户需求生成详细旅行计划。返回纯JSON，不含markdown标记。
 
 返回格式：
 {
@@ -93,35 +93,47 @@ async function generateTripPlan(params) {
   "destination": "目的地",
   "startDate": "开始日期",
   "endDate": "结束日期",
+  "estimatedBudget": 人均预算数字（元）,
   "days": [
     {
       "date": "日期",
-      "weather": "天气",
-      "tip": "旅行小贴士",
+      "weather": "天气(如:☀️ 晴 25°C)",
+      "tip": "当日旅行贴士",
       "places": [
         {
           "name": "地点名",
           "cat": "景点|美食|购物|咖啡|住宿|交通|其他",
           "time": "09:00",
           "duration": "1.5h",
-          "fee": "免费或价格",
-          "lat": 纬度数字,
-          "lng": 经度数字
+          "fee": "价格或免费",
+          "lat": 纬度,
+          "lng": 经度
         }
       ]
     }
   ]
-}`;
+}
+
+重要规则：
+- 每天安排2-4个地点，合理分布时间
+- Day1首个地点建议为抵达/入住类，DayN最后建议为返程/离开
+- 地点按时间顺序排列，上午→下午→晚上
+- 为每个地点提供真实经纬度坐标
+- 根据目的地季节给出合理的天气`;
 
   const userPrompt = `请为以下旅行生成${numDays}天详细行程：
 目的地：${destination}
-开始日期：${startDate}
+出发日期：${startDate}
 天数：${numDays}天
 人数：${members || 1}人
-预算：${budget || '不限'}
-偏好：${preferences || '无特殊偏好'}
+人均预算：${budget || '不限'}元
+偏好：${preferences || '综合体验'}
 
-每天安排2-3个地点，包括景点、美食、购物等。每个地点提供准确的经纬度坐标。`;
+要求：
+1. 第1天包含抵达和入住后开始游玩
+2. 最后1天包含离开/返程安排
+3. 每天的地点在物理距离上尽量相邻，减少交通时间
+4. 每个地点标注准确经纬度`;
 
   const content = await callAI(systemPrompt, userPrompt);
   return JSON.parse(content.trim());
