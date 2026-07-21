@@ -92,6 +92,17 @@ safeRender(function() {
     }
   }
 
+  // Generate day filter buttons dynamically
+  var filtersEl = document.getElementById('dayFilters');
+  if (filtersEl && trip.days instanceof Array && trip.days.length > 0) {
+    var filterHTML = '<button class="btn btn-primary btn-sm" onclick="filterDay(\'all\',this)">全部</button>';
+    trip.days.forEach(function(d, i) {
+      var color = DAY_COLORS[i % DAY_COLORS.length];
+      filterHTML += '<button class="btn btn-sm" style="background:var(--muted);color:var(--muted-fg);" onclick="filterDay(' + (i + 1) + ',this)"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';margin-right:4px;"></span>Day ' + (i + 1) + '</button>';
+    });
+    filtersEl.innerHTML = filterHTML;
+  }
+
   renderMap('all');
 
   window.filterDay = function(dayNum, el) {
