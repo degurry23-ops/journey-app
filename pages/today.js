@@ -68,18 +68,46 @@ safeRender(function() {
     el.textContent = tips[(todayDayIdx || 0) % tips.length];
   }
 
-  // ── Today's Route ──
+  // ── Today's Route (with next-stop highlight) ──
   el = document.getElementById('todayRoute');
   if (el && day.places && day.places.length) {
     var catIcon = { '景点': '🏯', '美食': '🍜', '咖啡': '☕', '购物': '🛍', '住宿': '🏨', '交通': '🚇', '其他': '📍' };
-    el.innerHTML = day.places.map(function(p, i) {
-      return '<div style="position:relative;margin-bottom:16px;">' +
-        '<div class="route-dot' + (i === 0 ? ' done' : '') + '"></div>' +
+    // Find next upcoming place (first one not yet passed based on time)
+    var nowHour = new Date().getHours();
+    var nextIdx = 0;
+    day.places.forEach(function(p, i) {
+      var pHour = parseInt((p.time || '09:00').split(':')[0]) || 9;
+      if (pHour <= nowHour + 1) nextIdx = i;
+    });
+    nextIdx = Math.min(nextIdx + 1, day.places.length - 1);
+    var nextPlace = day.places[nextIdx];
+
+    // Next stop highlight card
+    if (nextPlace) {
+      el.innerHTML = '<a href="' + (nextPlace.lat ? 'https://uri.amap.com/marker?position=' + nextPlace.lng + ',' + nextPlace.lat + '&name=' + encodeURIComponent(nextPlace.name) : '#') + '" target="_blank" style="text-decoration:none;color:inherit;">' +
+        '<div class="card" style="margin-bottom:16px;border:2px solid var(--accent);background:linear-gradient(135deg,rgba(0,82,255,.03),rgba(77,124,255,.03));">' +
+          '<div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;">📍 下一站</div>' +
+          '<div style="display:flex;align-items:center;gap:12px;">' +
+            '<span style="font-size:28px;">' + (catIcon[nextPlace.cat] || '📍') + '</span>' +
+            '<div style="flex:1;">' +
+              '<div style="font-weight:700;font-size:16px;">' + nextPlace.name + '</div>' +
+              '<div style="font-size:13px;color:var(--muted-fg);">' + (nextPlace.time || '') + ' · ' + (nextPlace.duration || '1h') + ' · ' + (nextPlace.fee || '免费') + '</div>' +
+            '</div>' +
+            '<i class="fas fa-arrow-right" style="color:var(--accent);"></i>' +
+          '</div></div></a>';
+    }
+
+    // Full route list
+    el.innerHTML += day.places.map(function(p, i) {
+      var isNext = (i === nextIdx);
+      return '<div style="position:relative;margin-bottom:12px;' + (isNext ? 'background:rgba(0,82,255,.03);border-radius:var(--radius);padding:8px;margin-left:-8px;margin-right:-8px;' : '') + '">' +
+        '<div class="route-dot' + (i <= nextIdx ? ' done' : '') + '" style="' + (isNext ? 'background:var(--accent);box-shadow:0 0 0 2px var(--accent);' : '') + '"></div>' +
         '<div style="margin-left:8px;">' +
           '<div style="display:flex;align-items:center;gap:8px;">' +
             '<span style="font-family:var(--font-mono);font-size:12px;color:var(--muted-fg);min-width:44px;">' + (p.time || '09:00') + '</span>' +
             '<span>' + (catIcon[p.cat] || '📍') + '</span>' +
-            '<span style="font-weight:600;font-size:14px;">' + p.name + '</span>' +
+            '<span style="font-weight:' + (isNext ? '700' : '500') + ';font-size:14px;">' + p.name + '</span>' +
+            (isNext ? '<span class="tag tag-blue" style="font-size:10px;">下一站</span>' : '') +
           '</div>' +
           '<div style="margin-left:64px;font-size:12px;color:var(--muted-fg);margin-top:2px;">' +
             (p.duration || '1h') + ' · ' + (p.fee || '免费') +
