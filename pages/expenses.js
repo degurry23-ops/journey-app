@@ -12,32 +12,35 @@ safeRender(function() {
 
   if (!trip.expenses) trip.expenses = [];
   var expenses = trip.expenses;
-  // Normalize: ensure each expense has currency fields
+  // Normalize: fill missing currency fields from the DATA, not destination guessing
   expenses.forEach(function(e) {
-    if (!e.currency) e.currency = (typeof getCurrency === 'function' ? getCurrency(trip.destination).code : 'CNY');
-    if (!e.settlementAmount) e.settlementAmount = Math.round(e.amount * (typeof getCurrency === 'function' ? getCurrency(trip.destination).rate : 1));
+    if (!e.currency) e.currency = 'CNY';
     if (!e.participants) e.participants = [];
-    if (e.amountCNY == null) e.amountCNY = Math.round(e.amount * (typeof getCurrency === 'function' ? getCurrency(trip.destination).rate : 1));
+    if (e.amountCNY == null) e.amountCNY = e.amount;
   });
 
-  saveTrips(loadTrips().map(function(t) { return t.id === trip.id ? trip : t; }));
+  // Detect foreign currency from ACTUAL expense data only
+  var foreignCodes = ['JPY','KRW','THB','USD','EUR'];
+  var expenseCurrencies = expenses.reduce(function(set, e) { if (e.currency) set[e.currency] = true; return set; }, {});
+  var foreignInData = Object.keys(expenseCurrencies).filter(function(c) { return foreignCodes.indexOf(c) >= 0; });
+  var isForeign = foreignInData.length > 0;
+
+  // Currency info: use actual expense currency for foreign, CNY for domestic
+  var cur = { sym: '¥', code: 'CNY', rate: 1 };
+  if (isForeign) {
+    var mainCur = foreignInData[0];
+    if (typeof getCurrency === 'function') {
+      cur = getCurrency(trip.destination);
+    } else {
+      cur = { sym: mainCur === 'JPY' ? '¥' : mainCur === 'KRW' ? '₩' : mainCur === 'THB' ? '฿' : '¥', code: mainCur, rate: 0.05 };
+    }
+  }
 
   var members = trip.memberNames || [];
   if (members.length === 0) {
     members.push('我');
     for (var m = 1; m < (trip.members || 1); m++) members.push('成员' + (m + 1));
   }
-
-  // Detect if trip is foreign by checking expense currencies in the DATA
-  var foreignCurrencies = ['JPY','KRW','THB','USD','EUR'];
-  var hasForeignExpense = expenses.some(function(e) { return e.currency && foreignCurrencies.indexOf(e.currency) >= 0; });
-  var cur = typeof getCurrency === 'function' ? getCurrency(trip.destination) : { sym: '¥', code: 'CNY', rate: 1 };
-  if (hasForeignExpense && cur.code === 'CNY') {
-    // If expenses are foreign but getCurrency didn't detect it, use the expense currency
-    var foreignExp = expenses.find(function(e) { return e.currency && foreignCurrencies.indexOf(e.currency) >= 0; });
-    if (foreignExp) cur = (typeof getCurrency === 'function' ? getCurrency(trip.destination) : null) || { sym: '¥', code: foreignExp.currency, rate: 0.05 };
-  }
-  var isForeign = hasForeignExpense;
 
   // Calculate totals in CNY for budget comparison
   var totalCNY = expenses.reduce(function(s, e) { return s + (e.amountCNY || Math.round(e.amount * cur.rate)); }, 0);
