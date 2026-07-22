@@ -12,12 +12,38 @@ safeRender(function() {
 
   if (!trip.expenses) trip.expenses = [];
   var expenses = trip.expenses;
-  // Normalize: fill missing currency fields from the DATA, not destination guessing
+  // Normalize: fill missing data, convert foreign amounts to CNY
+  var isForeign;
+  var cur = { sym: '¥', code: 'CNY', rate: 1 };
+  var foreignCodes = ['JPY','KRW','THB','USD','EUR'];
+  // Fallback rates: 1 unit of foreign currency = ? CNY
+  var rates = { JPY: 0.048, KRW: 0.0053, THB: 0.20, USD: 7.25, EUR: 7.90 };
+  // Override with LIVE_RATES (which stores CNY→foreign, so invert: 1/JPY)
+  if (typeof LIVE_RATES !== 'undefined') {
+    Object.keys(rates).forEach(function(k) {
+      if (LIVE_RATES[k] && LIVE_RATES[k] > 0) rates[k] = 1 / LIVE_RATES[k];
+    });
+  }
+  var totalLocal = 0;
+  var totalCNY = 0;
   expenses.forEach(function(e) {
     if (!e.currency) e.currency = 'CNY';
     if (!e.participants) e.participants = [];
-    if (e.amountCNY == null) e.amountCNY = e.amount;
+    // Calculate conversion: if foreign currency, convert; if CNY, 1:1
+    var rate = rates[e.currency] || 1;
+    if (e.amountCNY == null || e.amountCNY === 0) {
+      e.amountCNY = Math.round(e.amount * rate);
+    }
+    totalLocal += e.amount;
+    totalCNY += e.amountCNY;
   });
+  var expenseCurrencies = expenses.reduce(function(set, e) { if (e.currency) set[e.currency] = true; return set; }, {});
+  var foreignInData = Object.keys(expenseCurrencies).filter(function(c) { return foreignCodes.indexOf(c) >= 0; });
+  isForeign = foreignInData.length > 0;
+  if (isForeign) {
+    var mainCur = foreignInData[0];
+    cur = { sym: mainCur === 'KRW' ? '₩' : mainCur === 'THB' ? '฿' : '¥', code: mainCur, rate: rates[mainCur] || 0.05 };
+  }
 
   // Detect foreign currency from ACTUAL expense data only
   var foreignCodes = ['JPY','KRW','THB','USD','EUR'];
